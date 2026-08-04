@@ -1,10 +1,11 @@
+from parsers.base_parser import BaseParser
 import re
 import dateparser
 import logging
 
 logger = logging.getLogger(__name__)
 
-class TextParser:
+class TextParser(BaseParser):
     def _create_result(self, value, confidence, page, text_snippet):
         return {
             "value": value,
@@ -29,7 +30,7 @@ class TextParser:
                     try:
                         clean = re.sub(r'[^0-9-]', '', val_str)
                         parsed_val = int(clean.split('-')[0])
-                    except: pass
+                    except Exception as e: logger.debug(f'Parsing error: {e}')
                 else:
                     level_match = re.search(r'Level\s*([0-9]{1,2})', snippet, re.IGNORECASE)
                     if level_match:
@@ -47,7 +48,7 @@ class TextParser:
                     if parsed_val > 0 and conf > highest_conf:
                         highest_conf = conf
                         best_match = self._create_result(parsed_val, conf, page_num, match2.group(0))
-                except: pass
+                except Exception as e: logger.debug(f'Parsing error: {e}')
         return best_match or self._create_result(0, 0.0, None, "")
 
     def vacancy_parser(self, pages_text: list) -> dict:
@@ -62,7 +63,7 @@ class TextParser:
                     if conf > highest_conf:
                         highest_conf = conf
                         best_match = self._create_result(val, conf, page_num, match.group(1))
-                except: pass
+                except Exception as e: logger.debug(f'Parsing error: {e}')
             
             match2 = re.search(r'((\d{1,4})\s*(?:vacancies|posts|positions))', text, re.IGNORECASE)
             if match2:
@@ -72,7 +73,7 @@ class TextParser:
                     if conf > highest_conf:
                         highest_conf = conf
                         best_match = self._create_result(val, conf, page_num, match2.group(1))
-                except: pass
+                except Exception as e: logger.debug(f'Parsing error: {e}')
         return best_match or self._create_result(0, 0.0, None, "")
 
     def age_parser(self, pages_text: list) -> dict:
@@ -120,7 +121,7 @@ class TextParser:
                     if conf > highest_conf:
                         highest_conf = conf
                         best_match = self._create_result(val, conf, page_num, match.group(1))
-                except: pass
+                except Exception as e: logger.debug(f'Parsing error: {e}')
             
             match2 = re.search(r'((?:Experience)[\s:-]*(\d+)\s*(?:years|yrs))', text, re.IGNORECASE)
             if match2:
@@ -130,7 +131,7 @@ class TextParser:
                     if conf > highest_conf:
                         highest_conf = conf
                         best_match = self._create_result(val, conf, page_num, match2.group(1))
-                except: pass
+                except Exception as e: logger.debug(f'Parsing error: {e}')
         return best_match or self._create_result(None, 0.0, None, "")
 
     def qualification_parser(self, pages_text: list) -> dict:
@@ -215,3 +216,21 @@ class TextParser:
             "dates": self.important_dates_parser(pages_text),
             "selection_process": self.selection_process_parser(pages_text)
         }
+
+    def parse(self, source: str, **kwargs) -> dict:
+        # source here is expected to be a list of pages [(page_num, text)] or plain text
+        if isinstance(source, str):
+            source = [(1, source)]
+        try:
+            structured = self.parse_all(source)
+            text_combined = "\n".join([p[1] for p in source])
+            return self._standard_response(
+                parser_name="text_field_extractor",
+                success=True,
+                text=text_combined,
+                structured_data=structured,
+                confidence=0.9
+            )
+        except Exception as e:
+            logger.error(f"TextParser parse failed: {e}")
+            return self._standard_response(parser_name="text_field_extractor", success=False, confidence=0.0)
