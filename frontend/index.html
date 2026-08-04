@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GovTrack AI Executive Dashboard</title>
+    <link rel="stylesheet" href="style.css">\n    <link rel="stylesheet" href="domain_modal.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>GovTrack<span class="highlight">AI</span></h2>
+            </div>
+            <nav>
+                <ul>
+                    <li class="active">Dashboard</li>
+                    <li>Job Browser</li>
+                    <li>Applications</li>
+                    <li>Exam Calendar</li>
+                    <li>Analytics</li>
+                </ul>
+            </nav>
+            <div class="profile-widget" id="profileWidget">
+                <!-- Injected via JS -->
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <h1>Executive Dashboard</h1>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search jobs, organizations, skills...">
+                </div>
+            </header>
+
+            <section class="kpi-grid" id="kpiGrid">
+                <!-- Injected via JS -->
+            </section>
+
+            <section class="data-section">
+                <div class="table-header">
+                    <h2>Active Opportunities</h2>
+                    <button class="btn-primary">Filter</button>
+                </div>
+                <table class="glass-table">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Post</th>
+                            <th>Salary</th>
+                            <th>Priority</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="jobsTableBody">
+                        <!-- Injected via JS -->
+                    </tbody>
+                </table>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

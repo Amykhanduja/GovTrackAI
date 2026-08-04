@@ -1,0 +1,1 @@
+# Batch A (Banking, Financial, Regulators, Insurance)\n\nContains RBI, SBI, IBPS, NABARD, SEBI, etc.

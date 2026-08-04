@@ -1,0 +1,16 @@
+{
+    "domains": [
+        {
+            "id": "cyber_tech",
+            "name": "Cyber Security & Technology",
+            "keywords": ["cyber", "software", "network", "cloud", "ai", "scientist", "programmer"],
+            "orgs": ["NIC", "CERT-In", "DRDO", "ISRO", "C-DAC", "MeitY"]
+        },
+        {
+            "id": "foreign_lang",
+            "name": "Foreign Languages",
+            "keywords": ["translator", "interpreter", "japanese", "french", "german", "language", "teaching", "spanish"],
+            "orgs": ["Kendriya Vidyalaya", "Navodaya", "Embassy"]
+        }
+    ]
+}

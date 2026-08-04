@@ -1,0 +1,1 @@
+def normalize_text(text): pass

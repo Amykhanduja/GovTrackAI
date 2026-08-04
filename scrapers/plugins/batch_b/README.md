@@ -1,0 +1,1 @@
+# Batch B (Technology, Research, Defence, PSU, Scientific)\n\nContains NIC, CERT-In, ISRO, DRDO, etc.

@@ -1,0 +1,10 @@
+PyYAML
+SQLAlchemy
+pydantic
+requests
+beautifulsoup4
+pytest
+XlsxWriter
+fastapi
+httpx
+uvicorn

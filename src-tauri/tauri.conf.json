@@ -1,0 +1,53 @@
+{
+  "build": {
+    "beforeBuildCommand": "npm run build",
+    "beforeDevCommand": "npm run dev",
+    "devPath": "../frontend",
+    "distDir": "../frontend"
+  },
+  "package": {
+    "productName": "GovTrack AI",
+    "version": "1.0.0"
+  },
+  "tauri": {
+    "allowlist": {
+      "all": true
+    },
+    "bundle": {
+      "active": true,
+      "category": "Office",
+      "copyright": "GovTrack AI 2026",
+      "externalBin": ["govtrack-api"],
+      "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
+      "identifier": "com.govtrackai.app",
+      "targets": "all",
+      "windows": {
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "wix": {
+          "language": "en-US"
+        }
+      }
+    },
+    "updater": {
+      "active": true,
+      "endpoints": ["https://releases.govtrackai.com/{{target}}/{{current_version}}"],
+      "dialog": true,
+      "pubkey": "PUBLIC_KEY_PLACEHOLDER"
+    },
+    "systemTray": {
+      "iconPath": "icons/icon.png",
+      "iconAsTemplate": true
+    },
+    "windows": [
+      {
+        "fullscreen": false,
+        "height": 800,
+        "resizable": true,
+        "title": "GovTrack AI",
+        "width": 1200,
+        "visible": false
+      }
+    ]
+  }
+}

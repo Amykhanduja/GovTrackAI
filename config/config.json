@@ -1,0 +1,18 @@
+{
+    "database": {
+        "path": "data/govtrack.sqlite"
+    },
+    "automation": {
+        "schedule": "daily",
+        "parallel_workers": 10,
+        "retry_count": 3
+    },
+    "notifications": {
+        "desktop": true,
+        "telegram_token": "",
+        "telegram_chat_id": ""
+    },
+    "user": {
+        "profile_path": "config/profile.json"
+    }
+}

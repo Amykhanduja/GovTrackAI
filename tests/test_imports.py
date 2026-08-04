@@ -1,0 +1,12 @@
+def test_core_imports():
+    import core.engine
+    import db.connection
+    import scrapers.base_scraper
+    import parsers.base_parser
+    import ai.interfaces
+    import excel.engine
+    import notifications.manager
+    import scheduler.manager
+    import logger.manager
+    import storage.cache_manager
+    assert True

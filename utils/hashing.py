@@ -1,0 +1,1 @@
+def hash_content(content): pass

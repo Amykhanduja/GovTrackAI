@@ -1,0 +1,1 @@
+# Batch C (Central Government, UPSC, SSC, Forces)\n\nContains UPSC, SSC, Army, Navy, etc.
