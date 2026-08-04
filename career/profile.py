@@ -16,11 +16,12 @@ class UserProfileManager:
         return self._default_profile()
 
     def _default_profile(self) -> dict:
+        # Absolutely NO hardcoded placeholder tracking lists!
         return {
             'personal': {'name': '', 'age': None, 'languages': []},
-            'education': {'degree': 'B.Tech', 'specialization': 'Computer Science', 'graduation_year': 2026, 'cgpa': 8.5},
-            'skills': {'programming': ['Python', 'SQL'], 'certifications': []},
-            'preferences': {'organizations': ['NIC', 'RBI', 'ISRO'], 'locations': ['Delhi', 'Remote'], 'expected_salary': 1200000},
+            'education': {'degree': '', 'specialization': '', 'graduation_year': None, 'cgpa': None},
+            'skills': {'programming': [], 'certifications': []},
+            'preferences': {'organizations': [], 'locations': [], 'expected_salary': None},
             'career': {'experience_years': 0, 'gate_score': None}
         }
 

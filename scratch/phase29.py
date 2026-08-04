@@ -1,10 +1,114 @@
+import os
+
+project_root = "/mnt/c/Users/khand/GovTrackAI"
+
+nlp_code = '''import re
+import io
+import requests
+import dateparser
+from bs4 import BeautifulSoup
+from pypdf import PdfReader
+from datetime import datetime
 import logging
+
+logger = logging.getLogger('app.nlp_extractor')
+
+def parse_salary(text):
+    # Extract numeric salary values (e.g. 50000, 100000) or Pay Levels
+    match = re.search(r'(?:Rs\.?|₹|INR|Salary|Pay Scale)[\s]*([0-9,]{4,}(?:\s*-\s*[0-9,]{4,})?)/?|-?\s*Level\s*([0-9]{1,2})', text, re.IGNORECASE)
+    if match:
+        val = match.group(1)
+        if val:
+            try:
+                return int(re.sub(r'[^0-9]', '', val.split('-')[0]))
+            except:
+                pass
+        if match.group(2):
+            return int(match.group(2)) * 10000 # Estimate
+    return 0
+
+def parse_vacancies(text):
+    match = re.search(r'(?:Total|No\.\s*of)?\s*(?:Vacancies|Posts|Positions)[\s:-]*(\d{1,4})', text, re.IGNORECASE)
+    if match:
+        try: return int(match.group(1))
+        except: pass
+    return 0
+
+def parse_age(text):
+    match = re.search(r'(?:Age Limit|Maximum Age|Upper Age)[\s:-]*(?:up to\s*)?(\d{2})', text, re.IGNORECASE)
+    if match:
+        try: return int(match.group(1))
+        except: pass
+    return None
+
+def parse_experience(text):
+    match = re.search(r'(\d+)\s*(?:years|yrs)[\s]*(?:experience)', text, re.IGNORECASE)
+    if match:
+        try: return int(match.group(1))
+        except: pass
+    return None
+
+def parse_deadline(text):
+    match = re.search(r'(?:Last Date|Closing Date|Deadline|Apply till)[\s:-]*([0-9]{1,2}[\s\-/A-Za-z]+[0-9]{2,4})', text, re.IGNORECASE)
+    if match:
+        dt = dateparser.parse(match.group(1))
+        if dt: return dt
+    return None
+
+def parse_qualification(text):
+    match = re.search(r'(?:Qualification|Eligibility|Education)[\s:-]*([A-Za-z\s,.\/]+(?:Degree|Diploma|B\.E|B\.Tech|M\.Tech|Ph\.D|B\.Sc|M\.Sc|M\.A|B\.A|Masters|Bachelors|10th|12th|Graduation))', text, re.IGNORECASE)
+    if match:
+        return match.group(1).strip()[:100]
+    return None
+
+def extract_details_from_url(url: str):
+    data = {
+        "salary": 0,
+        "vacancies": 0,
+        "deadline": None,
+        "age_limit": None,
+        "experience_years": None,
+        "qualification": None
+    }
+    
+    if not url.startswith('http'):
+        return data
+
+    try:
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=15, verify=False)
+        response.raise_for_status()
+        
+        text_content = ""
+        content_type = response.headers.get('Content-Type', '').lower()
+        
+        if 'application/pdf' in content_type or url.lower().endswith('.pdf'):
+            reader = PdfReader(io.BytesIO(response.content))
+            for page in reader.pages[:5]:
+                text_content += page.extract_text() + " "
+        else:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            text_content = soup.get_text(separator=' ', strip=True)
+            
+        data['salary'] = parse_salary(text_content)
+        data['vacancies'] = parse_vacancies(text_content)
+        data['age_limit'] = parse_age(text_content)
+        data['experience_years'] = parse_experience(text_content)
+        data['deadline'] = parse_deadline(text_content)
+        data['qualification'] = parse_qualification(text_content)
+        
+    except Exception as e:
+        logger.error(f"NLP Extractor failed for {url}: {e}")
+        
+    return data
+'''
+
+manager_code = '''import logging
 import time
 from datetime import datetime
 from scrapers.shared.generic_portal import GenericPortalScraper
 from scrapers.registry import OrganizationRegistry
 from scrapers.nlp_extractor import extract_details_from_url
-from scrapers.filters import is_valid_job
 from db.connection import SessionLocal
 from db.models import Job, Organization
 
@@ -61,10 +165,6 @@ class ScraperManager:
                     db.commit()
                 
                 for j in jobs:
-                    if not is_valid_job(j['post'], org.name):
-                        logger.info(f"Filtered out non-job notification: {j['post']}")
-                        continue
-                        
                     existing = db.query(Job).filter(
                         Job.org_id == org.id,
                         Job.url == j['url']
@@ -72,7 +172,7 @@ class ScraperManager:
                     
                     if not existing:
                         # Deep parse the PDF/HTML
-                        nlp = extract_details_from_url(j['url'], org.name)
+                        nlp = extract_details_from_url(j['url'])
                         deadline = nlp['deadline'] or j.get('deadline')
                         
                         new_job = Job(
@@ -89,44 +189,13 @@ class ScraperManager:
                             experience_years=nlp['experience_years'],
                             status=self.calc_status(deadline)
                         )
-
                         db.add(new_job)
-                        db.flush() # get ID
-                        
-                        # Phase R2.5D, R2.5F, R2.5G
-                        local_path = None
-                        from scrapers.pdf_manager import PDFStorageManager
-                        if new_job.url.endswith('.pdf'):
-                            local_path = PDFStorageManager().download_if_needed(new_job.url, org.name)
-                        
-                        if local_path:
-                            from scrapers.nlp_extractor import deep_parse_pdf, generate_ai_summary, calculate_eligibility
-                            from db.models import JobDocument
-                            import json
-                            
-                            text, tables = deep_parse_pdf(local_path)
-                            summary = generate_ai_summary(text, nlp)
-                            elig_stat, elig_reason = calculate_eligibility(nlp)
-                            
-                            doc = JobDocument(
-                                job_id=new_job.id,
-                                pdf_path=local_path,
-                                extracted_text=text[:10000], # store up to 10k chars
-                                parsed_fields=json.dumps(nlp),
-                                extracted_tables=json.dumps(tables),
-                                ai_summary=summary,
-                                eligibility_status=elig_stat,
-                                eligibility_reason=elig_reason
-                            )
-                            db.add(doc)
-                        
                         self.stats['jobs_added'] += 1
-
                     else:
                         updated = False
                         # Retry extracting missing info for existing jobs dynamically!
                         if (existing.salary == 0 or not existing.deadline or not existing.qualification) and not existing.is_archived:
-                            nlp = extract_details_from_url(existing.url, org.name)
+                            nlp = extract_details_from_url(existing.url)
                             if not existing.salary and nlp['salary']:
                                 existing.salary = nlp['salary']
                                 updated = True
@@ -156,3 +225,12 @@ class ScraperManager:
             db.close()
             
         return self.stats
+'''
+
+with open(os.path.join(project_root, "scrapers", "nlp_extractor.py"), "w") as f:
+    f.write(nlp_code)
+
+with open(os.path.join(project_root, "scrapers", "manager.py"), "w") as f:
+    f.write(manager_code)
+
+print("Phase 29 NLP Extractors Generated.")

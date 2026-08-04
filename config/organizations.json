@@ -1,124 +1,343 @@
 {
     "organizations": [
         {
-            "id": "pm_office",
-            "name": "Prime Minister's Office",
-            "category": "CENTRAL GOVERNMENT",
-            "parent_ministry": "PMO",
-            "career_domain": ["cyber_tech", "foreign_lang"],
-            "url": "https://www.pmindia.gov.in/",
-            "recruitment_url": "https://www.pmindia.gov.in/en/recruitment/",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": false,
-            "preferred_method": "html",
-            "update_freq": "rare",
-            "priority": 90
+            "name": "RBI",
+            "category": "Banking",
+            "career_domain": [
+                "finance"
+            ],
+            "recruitment_url": "https://opportunities.rbi.org.in/Scripts/Vacancies.aspx"
         },
         {
-            "id": "mha",
-            "name": "Ministry of Home Affairs",
-            "category": "MINISTRIES",
-            "parent_ministry": "MHA",
-            "career_domain": ["cyber_tech"],
-            "url": "https://mha.gov.in/",
-            "recruitment_url": "https://mha.gov.in/vacancies",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": true,
-            "preferred_method": "html",
-            "update_freq": "medium",
-            "priority": 95
+            "name": "SBI",
+            "category": "Banking",
+            "career_domain": [
+                "finance"
+            ],
+            "recruitment_url": "https://sbi.co.in/web/careers/current-openings"
         },
         {
-            "id": "meity",
-            "name": "Ministry of Electronics and Information Technology",
-            "category": "MINISTRIES",
-            "parent_ministry": "MeitY",
-            "career_domain": ["cyber_tech"],
-            "url": "https://www.meity.gov.in/",
-            "recruitment_url": "https://www.meity.gov.in/vacancies",
-            "has_rss": true,
-            "has_api": false,
-            "requires_js": false,
-            "preferred_method": "rss",
-            "update_freq": "high",
-            "priority": 100
+            "name": "IBPS",
+            "category": "Banking",
+            "career_domain": [
+                "finance"
+            ],
+            "recruitment_url": "https://www.ibps.in/"
         },
         {
-            "id": "cbi",
-            "name": "Central Bureau of Investigation",
-            "category": "ATTACHED DEPARTMENTS",
-            "parent_ministry": "Personnel",
-            "career_domain": ["cyber_tech", "foreign_lang"],
-            "url": "https://cbi.gov.in/",
-            "recruitment_url": "https://cbi.gov.in/vacancies",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": true,
-            "preferred_method": "html",
-            "update_freq": "medium",
-            "priority": 95
+            "name": "NIC",
+            "category": "Technology",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.nic.in/recruitments/"
         },
         {
-            "id": "mea",
-            "name": "Ministry of External Affairs",
-            "category": "LANGUAGE DOMAIN",
-            "parent_ministry": "MEA",
-            "career_domain": ["foreign_lang", "cyber_tech"],
-            "url": "https://mea.gov.in/",
-            "recruitment_url": "https://mea.gov.in/vacancies.htm",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": false,
-            "preferred_method": "html",
-            "update_freq": "high",
-            "priority": 100
+            "name": "NIELIT",
+            "category": "Technology",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://nielit.gov.in/recruitments"
         },
         {
-            "id": "jnu",
-            "name": "Jawaharlal Nehru University",
-            "category": "LANGUAGE DOMAIN",
-            "parent_ministry": "Education",
-            "career_domain": ["foreign_lang"],
-            "url": "https://www.jnu.ac.in/",
-            "recruitment_url": "https://www.jnu.ac.in/career",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": false,
-            "preferred_method": "html",
-            "update_freq": "medium",
-            "priority": 85
+            "name": "DRDO",
+            "category": "Defense",
+            "career_domain": [
+                "cyber_tech",
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.drdo.gov.in/careers"
         },
         {
-            "id": "isro",
             "name": "ISRO",
-            "category": "SPACE & SCIENCE",
-            "parent_ministry": "Department of Space",
-            "career_domain": ["cyber_tech"],
-            "url": "https://www.isro.gov.in/",
-            "recruitment_url": "https://www.isro.gov.in/Careers.html",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": true,
-            "preferred_method": "html",
-            "update_freq": "high",
-            "priority": 100
+            "category": "Space",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.isro.gov.in/Careers.html"
         },
         {
-            "id": "sbi",
-            "name": "State Bank of India",
-            "category": "BANKS",
-            "parent_ministry": "Finance",
-            "career_domain": ["cyber_tech"],
-            "url": "https://sbi.co.in/",
-            "recruitment_url": "https://sbi.co.in/web/careers",
-            "has_rss": false,
-            "has_api": false,
-            "requires_js": true,
-            "preferred_method": "html",
-            "update_freq": "high",
-            "priority": 100
+            "name": "BARC",
+            "category": "Research",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.barc.gov.in/careers/"
+        },
+        {
+            "name": "CDAC",
+            "category": "Technology",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.cdac.in/index.aspx?id=current_jobs"
+        },
+        {
+            "name": "CERT-In",
+            "category": "Security",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.cert-in.org.in/"
+        },
+        {
+            "name": "MeitY",
+            "category": "Ministry",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.meity.gov.in/vacancies"
+        },
+        {
+            "name": "NCIIPC",
+            "category": "Security",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://nciipc.gov.in/"
+        },
+        {
+            "name": "ECIL",
+            "category": "PSU",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.ecil.co.in/jobs.html"
+        },
+        {
+            "name": "BEL",
+            "category": "PSU",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://bel-india.in/CareersGridbind.aspx"
+        },
+        {
+            "name": "BHEL",
+            "category": "PSU",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://careers.bhel.in/"
+        },
+        {
+            "name": "HAL",
+            "category": "PSU",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://hal-india.co.in/Career"
+        },
+        {
+            "name": "GAIL",
+            "category": "PSU",
+            "career_domain": [
+                "energy"
+            ],
+            "recruitment_url": "https://gailonline.com/CRApplyingGail.html"
+        },
+        {
+            "name": "ONGC",
+            "category": "PSU",
+            "career_domain": [
+                "energy"
+            ],
+            "recruitment_url": "https://ongcindia.com/web/eng/career"
+        },
+        {
+            "name": "NPCIL",
+            "category": "PSU",
+            "career_domain": [
+                "energy"
+            ],
+            "recruitment_url": "https://npcilcareers.co.in/"
+        },
+        {
+            "name": "C-DOT",
+            "category": "Technology",
+            "career_domain": [
+                "cyber_tech"
+            ],
+            "recruitment_url": "https://www.cdot.in/cdotweb/web/careers.php"
+        },
+        {
+            "name": "Income Tax",
+            "category": "Ministry",
+            "career_domain": [
+                "finance"
+            ],
+            "recruitment_url": "https://incometaxindia.gov.in/Pages/about-us/recruitment-notices.aspx"
+        },
+        {
+            "name": "UPSC",
+            "category": "Commission",
+            "career_domain": [
+                "admin",
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://upsc.gov.in/"
+        },
+        {
+            "name": "SSC",
+            "category": "Commission",
+            "career_domain": [
+                "admin",
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://ssc.nic.in/"
+        },
+        {
+            "name": "MEA",
+            "category": "Ministry",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.mea.gov.in/vacancies.htm"
+        },
+        {
+            "name": "EFLU",
+            "category": "Education",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.efluniversity.ac.in/"
+        },
+        {
+            "name": "Cabinet Secretariat",
+            "category": "Ministry",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://cabsec.gov.in/more/vacancies/"
+        },
+        {
+            "name": "ICCR",
+            "category": "Council",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.iccr.gov.in/vacancies"
+        },
+        {
+            "name": "JNU",
+            "category": "University",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://jnu.ac.in/career"
+        },
+        {
+            "name": "Delhi University (DU)",
+            "category": "University",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "http://www.du.ac.in/index.php?page=work-with-du"
+        },
+        {
+            "name": "JMI",
+            "category": "University",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://jmi.ac.in/bulletinboard/NoticeJob/latest/1"
+        },
+        {
+            "name": "IGNOU",
+            "category": "University",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "http://ignou.ac.in/ignou/bulletinboard/advertisements/latest/jobs"
+        },
+        {
+            "name": "KVS",
+            "category": "Education",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://kvsangathan.nic.in/employment-notice/"
+        },
+        {
+            "name": "NVS",
+            "category": "Education",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://navodaya.gov.in/nvs/en/Recruitment/"
+        },
+        {
+            "name": "DSSSB",
+            "category": "Board",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://dsssb.delhi.gov.in/current-vacancies"
+        },
+        {
+            "name": "UGC",
+            "category": "Commission",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.ugc.gov.in/ugc_jobs.aspx"
+        },
+        {
+            "name": "AICTE",
+            "category": "Council",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.aicte-india.org/bulletins/advertisements"
+        },
+        {
+            "name": "NCERT",
+            "category": "Council",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://ncert.nic.in/vacancies.php"
+        },
+        {
+            "name": "NTA",
+            "category": "Agency",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://nta.ac.in/Recruitment"
+        },
+        {
+            "name": "Intelligence Bureau (IB)",
+            "category": "Security",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://mha.gov.in/vacancies"
+        },
+        {
+            "name": "Army Education Corps",
+            "category": "Defense",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://joinindianarmy.nic.in/"
+        },
+        {
+            "name": "Indian Navy Education",
+            "category": "Defense",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://www.joinindiannavy.gov.in/"
+        },
+        {
+            "name": "IAF Education",
+            "category": "Defense",
+            "career_domain": [
+                "foreign_lang"
+            ],
+            "recruitment_url": "https://afcat.cdac.in/"
         }
     ]
 }

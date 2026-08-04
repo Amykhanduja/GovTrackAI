@@ -1,4 +1,13 @@
-const API_BASE = '/api/v1';
+import os
+
+project_root = "/mnt/c/Users/khand/GovTrackAI"
+app_js_path = os.path.join(project_root, "frontend", "app.js")
+
+with open(app_js_path, "r") as f:
+    lines = f.readlines()
+
+# We will completely overwrite app.js since Tabulator changes the entire core rendering loop.
+app_js_code = '''const API_BASE = '/api/v1';
 let currentDomain = localStorage.getItem('govtrack_domain') || null;
 let currentFilter = 'active'; 
 let allJobs = [];
@@ -97,8 +106,7 @@ function renderJobs() {
     if (filtered.length === 0) {
         if(emptyState) {
             emptyState.style.display = 'block';
-            let dName = currentDomain === 'cyber_tech' ? 'Cyber Security' : 'Language';
-            emptyState.textContent = `No active Government recruitment is currently available for the ${dName} domain.`;
+            emptyState.textContent = 'No recruitment notifications found.';
         }
         if(tabulatorTable) tabulatorTable.clearData();
         return;
@@ -124,9 +132,9 @@ function renderJobs() {
             columns: [
                 { formatter: "rowSelection", titleFormatter: "rowSelection", hozAlign: "center", headerSort: false, frozen: true, width: 40 },
                 { title: "Fav", field: "fav", formatter: (c) => c.getValue() > 0 ? '<span style="color:#fbbf24; font-size:16px;">★</span>' : '<span style="color:gray; font-size:16px;">☆</span>', hozAlign: "center", width: 60, cellClick: (e, cell) => window.toggleFav(cell.getRow().getData().id) },
-                { title: "Organization", field: "org", frozen: true, width: 150 },
-                { title: "Post Name", field: "post", width: 250, formatter: "textarea" },
-                { title: "Status", field: "status", width: 140, formatter: (cell) => {
+                { title: "Organization", field: "org", frozen: true, headerFilter: "input", width: 150 },
+                { title: "Post Name", field: "post", headerFilter: "input", width: 250, formatter: "textarea" },
+                { title: "Status", field: "status", width: 140, headerFilter: "select", headerFilterParams: {values:true}, formatter: (cell) => {
                     const stat = calculateStatus(cell.getRow().getData().deadline);
                     return `<span class="badge ${stat.class}">${stat.text}</span>`;
                 }},
@@ -148,7 +156,7 @@ function renderJobs() {
                     const id = cell.getRow().getData().id;
                     const url = cell.getRow().getData().url;
                     return `
-                        <button title="Intelligent View" onclick="window.openIntelligentViewer(${id}, '${url}')" style="background:transparent; border:none; cursor:pointer; font-size:16px; margin-right:5px">🧠</button>
+                        <button title="Open Website/PDF" onclick="window.open('${url}')" style="background:transparent; border:none; cursor:pointer; font-size:16px; margin-right:5px">🔗</button>
                         <button title="Hide" onclick="window.quickAction(${id}, 'hide')" style="background:transparent; border:none; cursor:pointer; font-size:16px; margin-right:5px">👁</button>
                         <button title="Archive" onclick="window.quickAction(${id}, 'archive')" style="background:transparent; border:none; cursor:pointer; font-size:16px; margin-right:5px">📦</button>
                         <button title="Trash" onclick="window.quickAction(${id}, 'trash')" style="background:transparent; border:none; cursor:pointer; font-size:16px; color:#f87171">🗑</button>
@@ -182,50 +190,30 @@ function renderChart(canvasId, type, dataObj, palette) {
 }
 
 async function fetchAnalytics() {
+    if (!currentDomain) return;
     try {
-        const dom = document.getElementById('anFilterDomain').value;
-        const stat = document.getElementById('anFilterStatus').value;
-        let url = `${API_BASE}/analytics/?`;
-        if (dom) url += `domain=${dom}&`;
-        else if (currentDomain) url += `domain=${currentDomain}&`;
-        if (stat) url += `status=${encodeURIComponent(stat)}&`;
-        
-        const res = await fetch(url);
+        const res = await fetch(`${API_BASE}/analytics/?domain=${currentDomain}`);
         const data = await res.json();
-        
         if (data.total_jobs === 0) {
             document.querySelector('.analytics-grid').style.display = 'none';
-            document.querySelector('.kpi-grid').style.display = 'none';
             if(analyticsEmptyState) analyticsEmptyState.style.display = 'block';
             return;
         }
         document.querySelector('.analytics-grid').style.display = 'grid';
-        document.querySelector('.kpi-grid').style.display = 'grid';
         if(analyticsEmptyState) analyticsEmptyState.style.display = 'none';
         
-        document.getElementById('kpiAvgSal').textContent = '₹' + data.average_salary.toLocaleString();
-        document.getElementById('kpiHighSal').textContent = '₹' + data.highest_salary.toLocaleString();
-        document.getElementById('kpiBooks').textContent = data.bookmarks;
-        document.getElementById('kpiWeek').textContent = data.jobs_closing_this_week;
-        
         const c1 = ['#3b82f6', 'rgba(255,255,255,0.1)'];
-        const cMulti = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e', '#6366f1', '#14b8a6', '#84cc16'];
+        const cMulti = ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4', '#f43f5e'];
         
         renderChart('chartApplied', 'doughnut', data.applied_vs_pending, c1);
-        renderChart('chartAppOrg', 'bar', data.applications_by_org, '#3b82f6');
-        renderChart('chartAppMin', 'pie', data.applications_by_ministry, cMulti);
-        renderChart('chartDomain', 'pie', data.jobs_by_domain, cMulti);
-        renderChart('chartQual', 'bar', data.jobs_by_qual, '#10b981');
-        renderChart('chartSal', 'bar', data.jobs_by_salary, '#f59e0b');
+        renderChart('chartOrg', 'bar', data.jobs_by_org, '#3b82f6');
+        renderChart('chartMinistry', 'pie', data.jobs_by_ministry, cMulti);
+        renderChart('chartQual', 'bar', data.jobs_by_qualification, '#10b981');
+        renderChart('chartSalary', 'bar', data.jobs_by_salary, '#f59e0b');
         renderChart('chartAge', 'line', data.jobs_by_age, '#8b5cf6');
-        renderChart('chartExp', 'bar', data.jobs_by_exp, '#06b6d4');
-        renderChart('chartTrend', 'line', data.monthly_trend, '#ec4899');
-        renderChart('chartDeadlines', 'bar', data.upcoming_deadlines, '#ef4444');
-        renderChart('chartFav', 'bar', data.favorite_orgs, '#f59e0b');
-        renderChart('chartMostApp', 'bar', data.most_applied_orgs, '#10b981');
-        renderChart('chartTopOrg', 'bar', data.top_recruiting_orgs, '#3b82f6');
-        renderChart('chartTopPay', 'bar', data.top_paying_orgs, '#8b5cf6');
-    } catch(e) { console.error(e); }
+        renderChart('chartExp', 'bar', data.jobs_by_experience, '#06b6d4');
+        renderChart('chartDeadline', 'line', data.upcoming_deadlines, '#ec4899');
+    } catch(e) {}
 }
 
 window.fetchCalendarFilters = async function() {
@@ -386,51 +374,28 @@ if(domainDisplay) domainDisplay.textContent = localStorage.getItem('govtrack_dom
 
 document.querySelectorAll('.view-container').forEach(v => { if(!v.classList.contains('active')) v.style.display = 'none'; });
 fetchJobs();
+'''
 
-window.openIntelligentViewer = async function(id, fallbackUrl) {
-    document.getElementById("pvTitle").textContent = "Loading AI Analysis...";
-    document.getElementById("pvSummary").textContent = "Extracting data...";
-    document.getElementById("pvStruct").textContent = "";
-    document.getElementById("pvTables").innerHTML = "";
-    document.getElementById("pvEligibleBadge").textContent = "";
-    document.getElementById("pvEligibleReason").textContent = "";
-    document.getElementById("pvIframe").src = "about:blank";
-    
-    document.getElementById("pdfViewerModal").style.display = "flex";
-    
-    try {
-        const res = await fetch(`/api/v1/jobs/${id}/document`);
-        const data = await res.json();
-        
-        if (data.status === "found") {
-            document.getElementById("pvTitle").textContent = "Intelligent Document Analysis";
-            document.getElementById("pvSummary").textContent = data.ai_summary;
-            
-            if(data.eligibility_status === "Eligible") {
-                document.getElementById("pvEligibleBadge").style.background = "rgba(16, 185, 129, 0.2)";
-                document.getElementById("pvEligibleBadge").style.color = "#10b981";
-            } else if(data.eligibility_status === "Not Eligible") {
-                document.getElementById("pvEligibleBadge").style.background = "rgba(239, 68, 68, 0.2)";
-                document.getElementById("pvEligibleBadge").style.color = "#ef4444";
-            } else {
-                document.getElementById("pvEligibleBadge").style.background = "rgba(245, 158, 11, 0.2)";
-                document.getElementById("pvEligibleBadge").style.color = "#f59e0b";
-            }
-            
-            document.getElementById("pvEligibleBadge").textContent = `Status: ${data.eligibility_status}`;
-            document.getElementById("pvEligibleReason").textContent = data.eligibility_reason;
-            
-            document.getElementById("pvStruct").textContent = JSON.stringify(data.parsed_fields, null, 2);
-            document.getElementById("pvTables").innerHTML = `Found ${data.extracted_tables.length} structured tables dynamically extracted from the PDF.`;
-            
-            document.getElementById("pvIframe").src = `/api/v1/jobs/${id}/pdf`;
-        } else {
-            document.getElementById("pvTitle").textContent = "No Local PDF Available";
-            document.getElementById("pvSummary").textContent = "This notification did not contain an official PDF on the first scan. Loading original website...";
-            document.getElementById("pvIframe").src = fallbackUrl;
-        }
-    } catch(e) {
-        console.error(e);
-        document.getElementById("pvIframe").src = fallbackUrl;
-    }
-};
+with open(app_js_path, "w") as f:
+    f.write(app_js_code)
+
+print("app.js rewritten for Tabulator")
+
+# Wait! We need to add the backend route for patching Notes!
+# We're writing to `description` instead of a separate `notes` column.
+api_jobs_patch = '''
+@router.patch("/{job_id}/note")
+def update_job_note(job_id: int, note_data: dict, db: Session = Depends(get_db)):
+    job = db.query(Job).filter(Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+    job.description = note_data.get('note', '')
+    db.commit()
+    return {"status": "success"}
+'''
+
+api_jobs_path = os.path.join(project_root, "api", "routers", "jobs.py")
+with open(api_jobs_path, "a") as f:
+    f.write(api_jobs_patch)
+
+print("Jobs router patched for notes.")

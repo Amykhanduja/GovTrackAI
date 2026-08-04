@@ -3,66 +3,178 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GovTrack AI Executive Dashboard</title>
-    <link rel="stylesheet" href="style.css">\n    <link rel="stylesheet" href="domain_modal.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>GovTrack AI - Recruitment Workspace</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <link href="https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="domain_modal.css">
 </head>
 <body>
-    <div class="app-container">
-        <!-- Sidebar -->
+    <div id="initialLoader">
+        <div class="spinner"></div>
+        <h2>Loading GovTrack AI...</h2>
+    </div>
+    
+    <div class="workspace-container">
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <div class="logo">
-                <h2>GovTrack<span class="highlight">AI</span></h2>
-            </div>
+            <div class="brand">GovTrack AI</div>
+            <div class="domain-indicator" id="currentDomainDisplay">Loading Domain...</div>
             <nav>
-                <ul>
-                    <li class="active">Dashboard</li>
-                    <li>Job Browser</li>
-                    <li>Applications</li>
-                    <li>Exam Calendar</li>
-                    <li>Analytics</li>
-                </ul>
+                <button class="nav-btn active" onclick="switchTab('tableView', 'active')">Active Jobs</button>
+                <button class="nav-btn" onclick="switchTab('tableView', 'recent')">Recently Added</button>
+                <button class="nav-btn" onclick="switchTab('tableView', 'favorites')">Favorites ★</button>
+                <button class="nav-btn" onclick="switchTab('analyticsView', 'analytics')">📊 Analytics</button>
+                <button class="nav-btn" onclick="switchTab('calendarView', 'calendar')">📅 Calendar</button>
+                <button class="nav-btn" onclick="switchTab('tableView', 'hidden')">Hidden Jobs</button>
+                <button class="nav-btn" onclick="switchTab('tableView', 'archived')">Archived</button>
+                <button class="nav-btn" onclick="switchTab('tableView', 'trash')">Trash 🗑</button>
             </nav>
-            <div class="profile-widget" id="profileWidget">
-                <!-- Injected via JS -->
+            <div class="sidebar-bottom">
+                <button id="refreshBtn" class="action-btn">Refresh Data</button>
+                <button id="switchDomainBtn" class="action-btn">Switch Domain</button>
             </div>
         </aside>
 
-        <!-- Main Content -->
         <main class="main-content">
-            <header>
-                <h1>Executive Dashboard</h1>
+            <header class="toolbar">
                 <div class="search-bar">
-                    <input type="text" id="searchInput" placeholder="Search jobs, organizations, skills...">
+                    <input type="text" id="globalSearch" placeholder="Search Database...">
+                </div>
+                <div class="toolbar-actions">
+                    <select id="statusFilter" class="tool-select">
+                        <option value="active">Active & Upcoming</option>
+                        <option value="all">All Recruitments</option>
+                        <option value="closed">Closed Only</option>
+                    </select>
+                    <input type="file" id="excelUpload" accept=".xlsx" style="display:none;" onchange="uploadExcel(this)">
+                    <button class="tool-btn" onclick="document.getElementById('excelUpload').click()">Import Excel</button>
+                    <button class="tool-btn" onclick="exportData()">Export Excel</button>
+                    <button class="tool-btn" onclick="backupData()">Backup Data</button>
                 </div>
             </header>
 
-            <section class="kpi-grid" id="kpiGrid">
-                <!-- Injected via JS -->
-            </section>
+            <div class="bulk-actions" id="bulkActions" style="display: none;">
+                <span id="selectedCount">0 Selected</span>
+                <button onclick="bulkAction('favorite')">★ Favorite</button>
+                <button onclick="bulkAction('archive')">📦 Archive</button>
+                <button onclick="bulkAction('hide')">👁 Hide</button>
+                <button onclick="bulkAction('trash')" class="danger">🗑 Trash</button>
+            </div>
 
-            <section class="data-section">
-                <div class="table-header">
-                    <h2>Active Opportunities</h2>
-                    <button class="btn-primary">Filter</button>
+            <!-- Stats Modal Overlay -->
+            <div id="statsModal" class="stats-modal" style="display:none;">
+                <div class="stats-content">
+                    <h3>Refresh Complete</h3>
+                    <div class="stat-row"><span>Organizations Scanned:</span> <span id="statOrgs">0</span></div>
+                    <div class="stat-row"><span>Jobs Added:</span> <span id="statAdded" style="color: green; font-weight: bold;">0</span></div>
+                    <div class="stat-row"><span>Jobs Updated:</span> <span id="statUpdated">0</span></div>
+                    <div class="stat-row"><span>Jobs Auto-Archived:</span> <span id="statArchived" style="color: #d83b01;">0</span></div>
+                    <div class="stat-row"><span>Scraping Duration:</span> <span id="statDuration">0s</span></div>
+                    <div class="stat-row"><span>Failed Organizations:</span> <span id="statFailed" style="color: red;">None</span></div>
+                    <div class="stat-row"><span>Last Successful Refresh:</span> <span id="statLast">N/A</span></div>
+                    <button class="tool-btn" onclick="document.getElementById('statsModal').style.display='none'" style="margin-top: 15px; width: 100%;">Close</button>
                 </div>
-                <table class="glass-table">
-                    <thead>
-                        <tr>
-                            <th>Organization</th>
-                            <th>Post</th>
-                            <th>Salary</th>
-                            <th>Priority</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="jobsTableBody">
-                        <!-- Injected via JS -->
-                    </tbody>
-                </table>
-            </section>
+            </div>
+
+            <!-- Table View -->
+            <div class="view-container active" id="tableView">
+                <div class="table-wrapper">
+                    <div id="jobsTable"></div>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        No recruitment notifications found.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics View -->
+            <div class="view-container" id="analyticsView">
+                <div class="analytics-toolbar" style="display:flex; gap:10px; margin-bottom: 20px;">
+                    <select id="anFilterDomain" class="tool-select"><option value="">All Domains</option><option value="foreign_lang">Foreign Lang</option><option value="cyber_tech">Cyber Tech</option></select>
+                    <select id="anFilterStatus" class="tool-select"><option value="">All Statuses</option><option value="Applications Open">Open</option><option value="Closed">Closed</option></select>
+                    <button class="tool-btn" onclick="fetchAnalytics()">Filter Dashboard</button>
+                </div>
+                
+                <div class="kpi-grid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:15px; margin-bottom: 30px;">
+                    <div class="kpi-card" style="background:var(--card-bg); padding:15px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted);">Avg Salary</div>
+                        <div id="kpiAvgSal" style="font-size:24px; font-weight:bold; color:#10b981;">₹0</div>
+                    </div>
+                    <div class="kpi-card" style="background:var(--card-bg); padding:15px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted);">High Salary</div>
+                        <div id="kpiHighSal" style="font-size:24px; font-weight:bold; color:#f59e0b;">₹0</div>
+                    </div>
+                    <div class="kpi-card" style="background:var(--card-bg); padding:15px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted);">Bookmarks</div>
+                        <div id="kpiBooks" style="font-size:24px; font-weight:bold; color:#8b5cf6;">0</div>
+                    </div>
+                    <div class="kpi-card" style="background:var(--card-bg); padding:15px; border-radius:12px; border:1px solid var(--border-color); text-align:center;">
+                        <div style="font-size:12px; color:var(--text-muted);">Closing Week</div>
+                        <div id="kpiWeek" style="font-size:24px; font-weight:bold; color:#ef4444;">0</div>
+                    </div>
+                </div>
+
+                <div class="analytics-grid">
+                    <div class="chart-card"><h3>Applied vs Pending</h3><canvas id="chartApplied"></canvas></div>
+                    <div class="chart-card"><h3>Apps by Org</h3><canvas id="chartAppOrg"></canvas></div>
+                    <div class="chart-card"><h3>Apps by Ministry</h3><canvas id="chartAppMin"></canvas></div>
+                    <div class="chart-card"><h3>Jobs by Domain</h3><canvas id="chartDomain"></canvas></div>
+                    <div class="chart-card"><h3>Jobs by Qual</h3><canvas id="chartQual"></canvas></div>
+                    <div class="chart-card"><h3>Jobs by Salary</h3><canvas id="chartSal"></canvas></div>
+                    <div class="chart-card"><h3>Jobs by Age</h3><canvas id="chartAge"></canvas></div>
+                    <div class="chart-card"><h3>Jobs by Exp</h3><canvas id="chartExp"></canvas></div>
+                    <div class="chart-card"><h3>Monthly Trend</h3><canvas id="chartTrend"></canvas></div>
+                    <div class="chart-card"><h3>Upcoming Deadlines</h3><canvas id="chartDeadlines"></canvas></div>
+                    <div class="chart-card"><h3>Favorite Orgs</h3><canvas id="chartFav"></canvas></div>
+                    <div class="chart-card"><h3>Most Applied Orgs</h3><canvas id="chartMostApp"></canvas></div>
+                    <div class="chart-card"><h3>Top Recruiting Orgs</h3><canvas id="chartTopOrg"></canvas></div>
+                    <div class="chart-card"><h3>Top Paying Orgs</h3><canvas id="chartTopPay"></canvas></div>
+                </div>
+                <div id="analyticsEmptyState" class="empty-state" style="display: none;">No data available.</div>
+            </div>
+            <!-- Calendar View -->
+            <div class="view-container" id="calendarView" style="flex-direction:column; padding:15px; height: 100%;">
+                <div class="calendar-toolbar" style="margin-bottom:15px; display:flex; gap:10px;">
+                    <select id="calFilterOrg" class="tool-select"><option value="">All Orgs</option></select>
+                    <select id="calFilterState" class="tool-select"><option value="">All States</option></select>
+                    <select id="calFilterStatus" class="tool-select"><option value="">All Statuses</option></select>
+                    <select id="calFilterPriority" class="tool-select"><option value="">All Priorities</option></select>
+                    <button class="tool-btn" onclick="fetchCalendarEvents()">Apply Filters</button>
+                </div>
+                <div id="calendarEl" style="flex:1; background:#fff; padding:10px; border-radius:6px; border:1px solid var(--border-color); min-height: 500px;"></div>
+            </div>
         </main>
     </div>
+    
+    <script src="desktop_bridge.js"></script>
     <script src="app.js"></script>
+    <div id="pdfViewerModal" style="display:none; position:fixed; z-index:9999; left:0; top:0; width:100%; height:100%; background-color:rgba(0,0,0,0.8);">
+        <div style="display:flex; width:95%; height:95%; margin: 2.5vh auto; background:var(--bg-dark); border-radius:12px; overflow:hidden; border: 1px solid rgba(255,255,255,0.1);">
+            <div style="flex:1; padding:20px; border-right:1px solid rgba(255,255,255,0.1); overflow-y:auto; background: var(--bg-dark);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h2 id="pvTitle" style="color:#fff; margin-top:0;">Analysis</h2>
+                    <button onclick="document.getElementById('pdfViewerModal').style.display='none'" style="background:#ef4444; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer;">Close</button>
+                </div>
+                
+                <div id="pvEligibleBadge" style="padding:10px; border-radius:5px; font-weight:bold; margin-top:10px; margin-bottom:10px;"></div>
+                <div id="pvEligibleReason" style="font-size:13px; color:var(--text-muted); margin-bottom:20px;"></div>
+                
+                <h3 style="color:#60a5fa; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">AI Summary</h3>
+                <div id="pvSummary" style="font-size:14px; line-height:1.6; margin-bottom:20px; white-space:pre-wrap;"></div>
+                
+                <h3 style="color:#60a5fa; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Structured Extract</h3>
+                <pre id="pvStruct" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:5px; font-size:12px; overflow-x:auto;"></pre>
+                
+                <h3 style="color:#60a5fa; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Tables Found</h3>
+                <div id="pvTables" style="font-size:12px;"></div>
+            </div>
+            
+            <div style="flex:2; background:#1a1a1a;">
+                <iframe id="pvIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
