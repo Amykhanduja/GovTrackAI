@@ -1,4 +1,10 @@
-import re
+import os
+
+nlp_path = "/mnt/c/Users/khand/GovTrackAI/scrapers/nlp_extractor.py"
+with open(nlp_path, "r") as f:
+    nlp_content = f.read()
+
+integration_code = """import re
 import io
 import requests
 from bs4 import BeautifulSoup
@@ -101,11 +107,11 @@ def extract_details_from_url(url: str, org_name: str = "Unknown"):
     return data
 
 def generate_ai_summary(text, fields):
-    summary = "Official Notification Analysis:\n"
-    if fields.get('qualification'): summary += f"- Requires {fields['qualification']}\n"
-    if fields.get('vacancies', 0) > 0: summary += f"- {fields['vacancies']} total vacancies announced.\n"
-    if fields.get('salary', 0) > 0: summary += f"- Compensation scale starts around ₹{fields['salary']}.\n"
-    if fields.get('selection_process'): summary += f"- Selection process includes: {fields['selection_process']}\n"
+    summary = "Official Notification Analysis:\\n"
+    if fields.get('qualification'): summary += f"- Requires {fields['qualification']}\\n"
+    if fields.get('vacancies', 0) > 0: summary += f"- {fields['vacancies']} total vacancies announced.\\n"
+    if fields.get('salary', 0) > 0: summary += f"- Compensation scale starts around ₹{fields['salary']}.\\n"
+    if fields.get('selection_process'): summary += f"- Selection process includes: {fields['selection_process']}\\n"
     return summary
 
 def calculate_eligibility(fields):
@@ -127,3 +133,7 @@ def calculate_eligibility(fields):
         
     if not reasons: reasons.append("Matches standard generic criteria.")
     return status, " ".join(reasons)
+"""
+
+with open(nlp_path, "w") as f:
+    f.write(integration_code)

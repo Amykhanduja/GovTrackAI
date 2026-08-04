@@ -1,4 +1,64 @@
-import re
+import os
+
+base_path = "/mnt/c/Users/khand/GovTrackAI/parsers"
+
+# 1. Update pdf_parser.py
+pdf_parser_code = """import pdfplumber
+import fitz
+import logging
+
+logger = logging.getLogger(__name__)
+
+class PDFParser:
+    def extract_text(self, file_path: str) -> list:
+        \"\"\"Returns a list of tuples: [(page_num, text), ...]\"\"\"
+        pages_text = []
+        try:
+            with pdfplumber.open(file_path) as pdf:
+                for i, page in enumerate(pdf.pages):
+                    t = page.extract_text()
+                    if t: pages_text.append((i+1, t))
+        except Exception as e:
+            logger.warning(f"pdfplumber failed on {file_path}: {e}")
+            try:
+                with fitz.open(file_path) as doc:
+                    for i, page in enumerate(doc):
+                        t = page.get_text()
+                        if t: pages_text.append((i+1, t))
+            except Exception as e2:
+                logger.error(f"PyMuPDF failed on {file_path}: {e2}")
+        return pages_text
+"""
+with open(os.path.join(base_path, "pdf_parser.py"), "w") as f:
+    f.write(pdf_parser_code)
+
+# 2. Update html_parser.py
+html_parser_code = """from bs4 import BeautifulSoup
+import logging
+
+logger = logging.getLogger(__name__)
+
+class HTMLParser:
+    def extract_text(self, file_path_or_html: str, is_file: bool = True) -> list:
+        \"\"\"Returns a list of tuples: [(page_num, text), ...]\"\"\"
+        html = file_path_or_html
+        if is_file:
+            try:
+                with open(file_path_or_html, "r", encoding="utf-8") as f:
+                    html = f.read()
+            except Exception as e:
+                logger.error(f"Failed to read HTML file {file_path_or_html}: {e}")
+                return []
+        
+        soup = BeautifulSoup(html, 'html.parser')
+        text = soup.get_text(separator=' ', strip=True)
+        return [(1, text)]
+"""
+with open(os.path.join(base_path, "html_parser.py"), "w") as f:
+    f.write(html_parser_code)
+
+# 3. Update text_parser.py with all field extractors
+text_parser_code = """import re
 import dateparser
 import logging
 
@@ -140,11 +200,11 @@ class TextParser:
         for page_num, text in pages_text:
             match_ess = re.search(r'((?:Essential|Minimum) Qualification[\s:-]*(.+?))(?:Desirable|\Z)', text, re.IGNORECASE | re.DOTALL)
             if match_ess: 
-                ess = match_ess.group(2).strip()[:200].replace('\n', ' ')
+                ess = match_ess.group(2).strip()[:200].replace('\\n', ' ')
                 highest_conf, best_page, best_snippet = 0.95, page_num, match_ess.group(1)[:100]
             
-            match_des = re.search(r'((?:Desirable)(?:\s*Qualification)?[\s:-]*(.+?))(?:\n\n|\Z)', text, re.IGNORECASE | re.DOTALL)
-            if match_des: des = match_des.group(2).strip()[:200].replace('\n', ' ')
+            match_des = re.search(r'((?:Desirable) Qualification[\s:-]*(.+?))(?:\n\n|\Z)', text, re.IGNORECASE | re.DOTALL)
+            if match_des: des = match_des.group(2).strip()[:200].replace('\\n', ' ')
             
             match = re.search(r'((?:Qualification|Eligibility|Education)[\s:-]*([A-Za-z\s,.\/]+(?:Degree|Diploma|B\.E|B\.Tech|M\.Tech|Ph\.D|B\.Sc|M\.Sc|M\.A|B\.A|Masters|Bachelors|10th|12th|Graduation)))', text, re.IGNORECASE)
             if match: 
@@ -215,3 +275,6 @@ class TextParser:
             "dates": self.important_dates_parser(pages_text),
             "selection_process": self.selection_process_parser(pages_text)
         }
+"""
+with open(os.path.join(base_path, "text_parser.py"), "w") as f:
+    f.write(text_parser_code)

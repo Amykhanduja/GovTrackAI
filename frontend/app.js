@@ -395,6 +395,15 @@ window.openIntelligentViewer = async function(id, fallbackUrl) {
     document.getElementById("pvEligibleBadge").textContent = "";
     document.getElementById("pvEligibleReason").textContent = "";
     document.getElementById("pvIframe").src = "about:blank";
+    document.getElementById("pvIframe").style.display = "block";
+    document.getElementById("pvWebsiteBlocker").style.display = "none";
+    document.getElementById("pvBtnWeb").style.display = "block";
+    document.getElementById("pvBtnApply").style.display = "block";
+    document.getElementById("pvBtnPdf").style.display = "none";
+    
+    document.getElementById("pvBtnWeb").dataset.url = fallbackUrl;
+    document.getElementById("pvBtnApply").dataset.url = fallbackUrl;
+    document.getElementById("pvBlockerBtnWeb").dataset.url = fallbackUrl;
     
     document.getElementById("pdfViewerModal").style.display = "flex";
     
@@ -423,14 +432,18 @@ window.openIntelligentViewer = async function(id, fallbackUrl) {
             document.getElementById("pvStruct").textContent = JSON.stringify(data.parsed_fields, null, 2);
             document.getElementById("pvTables").innerHTML = `Found ${data.extracted_tables.length} structured tables dynamically extracted from the PDF.`;
             
+            document.getElementById("pvBtnPdf").style.display = "block";
+            document.getElementById("pvBtnPdf").dataset.pdf = `/api/v1/jobs/${id}/pdf`;
             document.getElementById("pvIframe").src = `/api/v1/jobs/${id}/pdf`;
         } else {
             document.getElementById("pvTitle").textContent = "No Local PDF Available";
             document.getElementById("pvSummary").textContent = "This notification did not contain an official PDF on the first scan. Loading original website...";
-            document.getElementById("pvIframe").src = fallbackUrl;
+            document.getElementById("pvIframe").style.display = "none";
+            document.getElementById("pvWebsiteBlocker").style.display = "flex";
         }
     } catch(e) {
         console.error(e);
-        document.getElementById("pvIframe").src = fallbackUrl;
+        document.getElementById("pvIframe").style.display = "none";
+        document.getElementById("pvWebsiteBlocker").style.display = "flex";
     }
 };

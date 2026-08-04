@@ -167,12 +167,28 @@
                 <h3 style="color:#60a5fa; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Structured Extract</h3>
                 <pre id="pvStruct" style="background:rgba(0,0,0,0.3); padding:10px; border-radius:5px; font-size:12px; overflow-x:auto;"></pre>
                 
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                    <button id="pvBtnWeb" onclick="window.open(this.dataset.url, '_blank')" class="tool-btn" style="width:100%; text-align:center; display:none;">Open Official Website ↗</button>
+                    <button id="pvBtnPdf" onclick="window.open(this.dataset.pdf, '_blank')" class="tool-btn" style="width:100%; text-align:center; display:none;">Open Notification PDF ↗</button>
+                    <button id="pvBtnApply" onclick="window.open(this.dataset.url, '_blank')" class="tool-btn" style="width:100%; text-align:center; display:none; background:rgba(16, 185, 129, 0.1); color:#34d399; border-color:rgba(16, 185, 129, 0.3);">Apply Now ↗</button>
+                </div>
+                
                 <h3 style="color:#60a5fa; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px;">Tables Found</h3>
                 <div id="pvTables" style="font-size:12px;"></div>
             </div>
             
-            <div style="flex:2; background:#1a1a1a;">
-                <iframe id="pvIframe" src="" style="width:100%; height:100%; border:none;"></iframe>
+            <div style="flex:2; background:#1a1a1a; display:flex; flex-direction:column; position:relative;">
+                <iframe id="pvIframe" src="" style="width:100%; height:100%; border:none; flex:1;"></iframe>
+                
+                <div id="pvWebsiteBlocker" style="display:none; position:absolute; top:0; left:0; width:100%; height:100%; background:#1a1a1a; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding: 40px; z-index:10;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🛡️</div>
+                    <h2 style="color: var(--text-main); margin-bottom: 10px;">Security Policy</h2>
+                    <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 30px; max-width: 400px; line-height: 1.5;">This website cannot be displayed inside GovTrack AI due to the organization's security policy. Click 'Open Official Website' to continue.</p>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <button id="pvBlockerBtnWeb" onclick="window.open(this.dataset.url, '_blank')" class="tool-btn" style="background: var(--primary); color: white; border:none; font-weight:bold;">Open Official Website ↗</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

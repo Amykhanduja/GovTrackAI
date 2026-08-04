@@ -1,78 +1,13 @@
-import logging
-import time
-from datetime import datetime
-from scrapers.shared.generic_portal import GenericPortalScraper
-from scrapers.registry import OrganizationRegistry
-from scrapers.nlp_extractor import extract_details_from_url
-from scrapers.filters import is_valid_job
-from db.connection import SessionLocal
-from db.models import Job, Organization
+import os
+import re
 
-logger = logging.getLogger('app.scraper_manager')
+manager_path = "/mnt/c/Users/khand/GovTrackAI/scrapers/manager.py"
+with open(manager_path, "r") as f:
+    code = f.read()
 
-class ScraperManager:
-    def __init__(self, config=None):
-        self.config = config or {}
-        self.registry = OrganizationRegistry()
-        self.stats = {
-            'organizations_scanned': 0, 
-            'jobs_added': 0, 
-            'jobs_updated': 0, 
-            'jobs_archived': 0,
-            'failed_orgs': [],
-            'duration_seconds': 0,
-            'last_successful_refresh': None
-        }
+# Replace the scraping logic inside manager.py to include confidence score checking and logging
 
-    def calc_status(self, deadline):
-        if not deadline: return "Applications Open"
-        diff = (deadline - datetime.now()).days
-        if diff < 0: return "Closed"
-        if diff <= 3: return "Closing Soon"
-        if diff > 30: return "Upcoming"
-        return "Applications Open"
-
-    def run_all(self):
-        db = SessionLocal()
-        start_time = time.time()
-        try:
-            now = datetime.now()
-            expired_jobs = db.query(Job).filter(Job.deadline < now, Job.is_archived == False).all()
-            for ej in expired_jobs:
-                ej.is_archived = True
-                ej.status = "Closed"
-                self.stats['jobs_archived'] += 1
-            db.commit()
-
-            for org_meta in self.registry.organizations:
-                self.stats['organizations_scanned'] += 1
-                scraper = GenericPortalScraper(org_meta)
-                jobs = scraper.scrape()
-                
-                if jobs is None:
-                    self.stats['failed_orgs'].append(org_meta['name'])
-                    continue
-                
-                org_name = org_meta['name']
-                org = db.query(Organization).filter(Organization.name == org_name).first()
-                if not org:
-                    org = Organization(name=org_name, category=org_meta.get('category'))
-                    db.add(org)
-                    db.commit()
-                
-                for j in jobs:
-                    if not is_valid_job(j['post'], org.name):
-                        logger.info(f"Filtered out non-job notification: {j['post']}")
-                        continue
-                        
-                    existing = db.query(Job).filter(
-                        Job.org_id == org.id,
-                        Job.url == j['url']
-                    ).first()
-                    
-                    if not existing:
-                        # Deep parse the PDF/HTML
-                                            # --- NEW PARSER ARCHITECTURE INTEGRATION ---
+replacement_code = """                    # --- NEW PARSER ARCHITECTURE INTEGRATION ---
                     # Only parse if we lack info or need to update
                     nlp = extract_details_from_url(job.url, org.name)
                     
@@ -151,12 +86,15 @@ class ScraperManager:
                             if old_doc:
                                 old_doc.parsed_fields = json.dumps(nlp)
                             self.stats['jobs_updated'] += 1
+"""
 
-                
-                db.commit()
-            self.stats['last_successful_refresh'] = now.strftime("%Y-%m-%d %H:%M:%S")
-        finally:
-            self.stats['duration_seconds'] = round(time.time() - start_time, 2)
-            db.close()
-            
-        return self.stats
+# We need to accurately replace the inner loop
+# Looking at manager.py, it starts with:
+# nlp = extract_details_from_url(job.url, org.name)
+# ... down to self.stats['jobs_updated'] += 1
+
+# I will just write a simpler patch script for manager.py
+code = re.sub(r'nlp = extract_details_from_url.*?self\.stats\[\'jobs_updated\'\] \+= 1', replacement_code, code, flags=re.DOTALL)
+
+with open(manager_path, "w") as f:
+    f.write(code)
