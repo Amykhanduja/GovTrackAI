@@ -1,0 +1,338 @@
+[
+  {
+    "Organization": "RBI",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "SBI",
+    "Status": "OK",
+    "Jobs Found": 29,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "IBPS",
+    "Status": "OK",
+    "Jobs Found": 10,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NIC",
+    "Status": "OK",
+    "Jobs Found": 1,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NIELIT",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "DRDO",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "ISRO",
+    "Status": "OK",
+    "Jobs Found": 17,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "BARC",
+    "Status": "OK",
+    "Jobs Found": 14,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "CDAC",
+    "Status": "OK",
+    "Jobs Found": 20,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "CERT-In",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "MeitY",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NCIIPC",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "ECIL",
+    "Status": "OK",
+    "Jobs Found": 1,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "BEL",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "BHEL",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "HAL",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "GAIL",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "ONGC",
+    "Status": "OK",
+    "Jobs Found": 5,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NPCIL",
+    "Status": "OK",
+    "Jobs Found": 1,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "C-DOT",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "Income Tax",
+    "Status": "OK",
+    "Jobs Found": 3,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "UPSC",
+    "Status": "OK",
+    "Jobs Found": 22,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "SSC",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "MEA",
+    "Status": "OK",
+    "Jobs Found": 1,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "EFLU",
+    "Status": "OK",
+    "Jobs Found": 8,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "Cabinet Secretariat",
+    "Status": "OK",
+    "Jobs Found": 2,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "ICCR",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "JNU",
+    "Status": "OK",
+    "Jobs Found": 52,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "Delhi University (DU)",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "JMI",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "IGNOU",
+    "Status": "OK",
+    "Jobs Found": 4,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "KVS",
+    "Status": "OK",
+    "Jobs Found": 7,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NVS",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "DSSSB",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "UGC",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "AICTE",
+    "Status": "OK",
+    "Jobs Found": 6,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NCERT",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "NTA",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "Intelligence Bureau (IB)",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "Army Education Corps",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "Indian Navy Education",
+    "Status": "OK",
+    "Jobs Found": 1,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  },
+  {
+    "Organization": "IAF Education",
+    "Status": "OK",
+    "Jobs Found": 0,
+    "Errors": 0,
+    "Skipped Jobs": 0,
+    "Reason": "N/A"
+  }
+]

@@ -100,3 +100,108 @@ class GenericPortalScraper(BaseScraper):
             logger.error(f"Failed to scrape {self.name}: {e}")
             
         return jobs
+
+    def run_diagnostic(self) -> dict:
+        import time
+        start = time.time()
+        diag = {
+            "organization": self.name,
+            "url": self.url,
+            "success": False,
+            "status_code": None,
+            "last_scan_time": datetime.now().isoformat(),
+            "pages_visited": 1,
+            "links_found": 0,
+            "parsed": 0,
+            "ignored": 0,
+            "ignored_reasons": {},
+            "errors": [],
+            "execution_time_sec": 0,
+            "zero_reason": None,
+            "raw_jobs": []
+        }
+        
+        try:
+            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+            try:
+                response = requests.get(self.url, headers=headers, timeout=20, verify=False)
+                diag["status_code"] = response.status_code
+                response.raise_for_status()
+            except requests.exceptions.Timeout:
+                diag["errors"].append("Connection timeout")
+                diag["zero_reason"] = "Connection timeout"
+                return diag
+            except requests.exceptions.RequestException as e:
+                diag["errors"].append(str(e))
+                diag["zero_reason"] = f"Request failed: {type(e).__name__}"
+                return diag
+
+            diag["success"] = True
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            pos_kws = ['recruit', 'vacancy', 'vacancies', 'apply', 'advertisement', 'notice', 'post of', 'hiring', 'walk-in', 'career']
+            neg_kws = ['news', 'tender', 'press release', 'event', 'seminar', 'competition', 'admission', 'scholarship', 'training', 'workshop', 'circular', 'conference', 'academic', 'result', 'syllabus', 'curriculum', 'exam schedule', 'answer key', 'corrigendum', 'cancellation']
+            
+            links = soup.find_all('a', href=True)
+            diag["links_found"] = len(links)
+            seen_titles = set()
+            
+            jobs = []
+            
+            for link in links:
+                text = link.get_text(separator=' ', strip=True)
+                href = link['href']
+                
+                if not text or len(text) < 10:
+                    diag["ignored"] += 1
+                    diag["ignored_reasons"]["Too short / No text"] = diag["ignored_reasons"].get("Too short / No text", 0) + 1
+                    continue
+                    
+                text_lower = text.lower()
+                href_lower = href.lower()
+                
+                has_pos = any(k in text_lower for k in pos_kws) or any(k in href_lower for k in pos_kws)
+                has_neg = any(k in text_lower for k in neg_kws) or any(k in href_lower for k in neg_kws)
+                
+                if not has_pos:
+                    diag["ignored"] += 1
+                    diag["ignored_reasons"]["No recruitment keywords"] = diag["ignored_reasons"].get("No recruitment keywords", 0) + 1
+                    continue
+                    
+                if has_neg:
+                    diag["ignored"] += 1
+                    diag["ignored_reasons"]["Contains negative keywords (e.g. tender, result)"] = diag["ignored_reasons"].get("Contains negative keywords (e.g. tender, result)", 0) + 1
+                    continue
+                
+                if text in seen_titles:
+                    diag["ignored"] += 1
+                    diag["ignored_reasons"]["Duplicate title"] = diag["ignored_reasons"].get("Duplicate title", 0) + 1
+                    continue
+                    
+                seen_titles.add(text)
+                
+                if not href.startswith('http'):
+                    href = self.url.rstrip('/') + '/' + href.lstrip('/')
+                    
+                diag["parsed"] += 1
+                jobs.append({
+                    "post": text[:200],
+                    "url": href
+                })
+            
+            diag["raw_jobs"] = jobs
+            if len(jobs) == 0:
+                if diag["links_found"] == 0:
+                    diag["zero_reason"] = "Website layout changed or no links found"
+                elif diag["ignored"] > 0:
+                    diag["zero_reason"] = "Recruitment filtered incorrectly or No active vacancies"
+                else:
+                    diag["zero_reason"] = "No recruitment page found"
+                    
+        except Exception as e:
+            diag["errors"].append(str(e))
+            diag["zero_reason"] = f"Parser failed: {e}"
+        finally:
+            diag["execution_time_sec"] = round(time.time() - start, 2)
+            
+        return diag

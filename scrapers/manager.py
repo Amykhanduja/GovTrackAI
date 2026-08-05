@@ -6,7 +6,9 @@ from scrapers.registry import OrganizationRegistry
 from scrapers.nlp_extractor import extract_details_from_url
 from scrapers.filters import is_valid_job
 from db.connection import SessionLocal
-from db.models import Job, Organization
+from db.models import Job, Organization, JobDocument, RecruitmentHistory
+from scrapers.nlp_extractor import generate_ai_summary, calculate_eligibility
+import json
 
 logger = logging.getLogger('app.scraper_manager')
 
@@ -19,17 +21,19 @@ class ScraperManager:
             'jobs_added': 0, 
             'jobs_updated': 0, 
             'jobs_archived': 0,
-            'failed_orgs': [],
             'duration_seconds': 0,
+            'failed_orgs': [],
             'last_successful_refresh': None
         }
 
     def calc_status(self, deadline):
         if not deadline: return "Applications Open"
-        diff = (deadline - datetime.now()).days
+        if isinstance(deadline, str):
+            deadline = datetime.fromisoformat(deadline)
+        now = datetime.now()
+        diff = (deadline - now).days
         if diff < 0: return "Closed"
         if diff <= 3: return "Closing Soon"
-        if diff > 30: return "Upcoming"
         return "Applications Open"
 
     def run_all(self):
@@ -41,6 +45,12 @@ class ScraperManager:
             for ej in expired_jobs:
                 ej.is_archived = True
                 ej.status = "Closed"
+                
+                # Also update history status if exists
+                hist = db.query(RecruitmentHistory).filter(RecruitmentHistory.job_id == ej.id).first()
+                if hist:
+                    hist.status = "Expired"
+                    
                 self.stats['jobs_archived'] += 1
             db.commit()
 
@@ -70,23 +80,21 @@ class ScraperManager:
                         Job.url == j['url']
                     ).first()
                     
-                    if not existing:
-                        # Deep parse the PDF/HTML
-                                            # --- NEW PARSER ARCHITECTURE INTEGRATION ---
+                    # Deep parse the PDF/HTML
+                    # --- NEW PARSER ARCHITECTURE INTEGRATION ---
                     # Only parse if we lack info or need to update
-                    nlp = extract_details_from_url(job.url, org.name)
+                    nlp = extract_details_from_url(j['url'], org.name)
                     
-                    # Log extracted fields
-                    for field, conf in nlp.get('confidence_scores', {}).items():
-                        logger.info(f"{field.capitalize()} extracted - Confidence {conf:.2f}")
-
-                    existing = db.query(Job).filter_by(url=job.url).first()
                     if not existing:
+                        # Log extracted fields
+                        for field, conf in nlp.get('confidence_scores', {}).items():
+                            logger.info(f"{field.capitalize()} extracted - Confidence {conf:.2f}")
+
                         new_job = Job(
-                            organization_id=org.id,
-                            title=job.title,
-                            url=job.url,
-                            domain=job.domain,
+                            org_id=org.id,
+                            title=j['post'],
+                            url=j['url'],
+                            domain=j['domains'][0] if j.get('domains') else 'uncategorized',
                             salary=nlp['salary'],
                             vacancies=nlp['vacancies'],
                             deadline=nlp['deadline'],
@@ -98,6 +106,23 @@ class ScraperManager:
                         db.add(new_job)
                         db.commit()
                         db.refresh(new_job)
+                        
+                        history = RecruitmentHistory(
+                            org_id=org.id,
+                            recruitment_name=j['post'],
+                            post_name=j['post'],
+                            notification_date=datetime.now(),
+                            vacancies=nlp['vacancies'],
+                            salary=nlp.get('salary', ''),
+                            qualification=nlp.get('qualification', ''),
+                            experience=nlp.get('experience_years'),
+                            age_limit=nlp.get('age_limit'),
+                            official_link=j['url'],
+                            status=new_job.status,
+                            job_id=new_job.id
+                        )
+                        db.add(history)
+                        db.commit()
                         
                         # Store AI Extract
                         doc = JobDocument(

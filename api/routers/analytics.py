@@ -42,7 +42,7 @@ def get_analytics(
     max_sal = max((s.salary for s in salaries), default=0)
     min_sal = min((s.salary for s in salaries), default=0)
     
-    bookmarks = q_base.filter(Job.fav > 0).count()
+    bookmarks = q_base.filter(Job.priority > 0).count()
     hidden = q_base.filter(Job.is_hidden == True).count()
     archived = q_base.filter(Job.is_archived == True).count()
     trash = q_base.filter(Job.is_trashed == True).count()
@@ -76,7 +76,7 @@ def get_analytics(
     
     deadlines = db.query(func.strftime('%Y-%m-%d', Job.deadline), func.count(Job.id)).filter(Job.deadline > now).group_by(func.strftime('%Y-%m-%d', Job.deadline)).limit(10).all()
     
-    fav_orgs = db.query(Organization.name, func.count(Job.id)).join(Job).filter(Job.fav > 0).group_by(Organization.name).limit(5).all()
+    fav_orgs = db.query(Organization.name, func.count(Job.id)).join(Job).filter(Job.priority > 0).group_by(Organization.name).limit(5).all()
     most_app_orgs = db.query(Organization.name, func.count(Job.id)).join(Job).filter(Job.is_applied == True).group_by(Organization.name).order_by(func.count(Job.id).desc()).limit(5).all()
     
     top_orgs = db.query(Organization.name, func.count(Job.id)).join(Job).group_by(Organization.name).order_by(func.count(Job.id).desc()).limit(10).all()

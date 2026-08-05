@@ -37,12 +37,27 @@ class AnalyticsResponse(BaseModel):
     total_jobs: int
     active_applications: int
     average_salary: int
+    highest_salary: int
+    lowest_salary: int
+    bookmarks: int
+    hidden_jobs: int
+    archived_jobs: int
+    trash_jobs: int
+    jobs_closing_today: int
+    jobs_closing_this_week: int
+    jobs_closing_this_month: int
     
     applied_vs_pending: ChartData
-    jobs_by_org: ChartData
-    jobs_by_ministry: ChartData
-    jobs_by_qualification: ChartData
+    applications_by_org: ChartData
+    applications_by_ministry: ChartData
+    jobs_by_domain: ChartData
+    jobs_by_qual: ChartData
     jobs_by_salary: ChartData
     jobs_by_age: ChartData
-    jobs_by_experience: ChartData
+    jobs_by_exp: ChartData
+    monthly_trend: ChartData
     upcoming_deadlines: ChartData
+    favorite_orgs: ChartData
+    most_applied_orgs: ChartData
+    top_recruiting_orgs: ChartData
+    top_paying_orgs: ChartData
