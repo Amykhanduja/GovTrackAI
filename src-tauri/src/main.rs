@@ -20,24 +20,36 @@ fn main() {
             // Launch the FastAPI Backend as a Sidecar Process
             let window = app.get_window("main").unwrap();
             
-            // In a real build, we would use sidecar("govtrack-api"). 
-            // For development, we spawn Python.
-            let (mut rx, child) = Command::new("python3")
-                .args(vec!["../desktop_entry.py"])
+            let (mut rx, child) = Command::new_sidecar("govtrack-api")
+                .expect("Failed to create sidecar command")
                 .spawn()
-                .expect("Failed to spawn FastAPI backend");
+                .expect("Failed to spawn FastAPI backend sidecar");
                 
-            let child_arc = Arc::new(Mutex::new(child));
+            app.manage(child);
             
             // Listen to Backend Logs
             tauri::async_runtime::spawn(async move {
+                let mut started = false;
                 while let Some(event) = rx.recv().await {
-                    if let CommandEvent::Stdout(line) = event {
-                        println!("API Log: {}", line);
-                        if line.contains("Application startup complete") {
-                            // Show window once API is ready
-                            window.show().unwrap();
+                    match event {
+                        CommandEvent::Stdout(line) => {
+                            println!("API Log: {}", line);
+                            if !started && line.contains("Application startup complete") {
+                                started = true;
+                                window.show().unwrap();
+                            }
                         }
+                        CommandEvent::Stderr(line) => {
+                            eprintln!("API Error: {}", line);
+                        }
+                        CommandEvent::Error(err) => {
+                            eprintln!("Sidecar Error: {}", err);
+                        }
+                        CommandEvent::Terminated(payload) => {
+                            eprintln!("Sidecar Terminated: {:?}", payload);
+                            std::process::exit(1);
+                        }
+                        _ => {}
                     }
                 }
             });

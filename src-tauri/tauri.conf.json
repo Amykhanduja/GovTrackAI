@@ -25,13 +25,14 @@
         "certificateThumbprint": null,
         "digestAlgorithm": "sha256",
         "wix": {
-          "language": "en-US"
+          "language": "en-US",
+          "template": null
         }
       }
     },
     "updater": {
       "active": true,
-      "endpoints": ["https://releases.govtrackai.com/{{target}}/{{current_version}}"],
+      "endpoints": ["https://api.github.com/repos/YOUR_GITHUB_USER/govtrack-ai/releases/latest"],
       "dialog": true,
       "pubkey": "PUBLIC_KEY_PLACEHOLDER"
     },

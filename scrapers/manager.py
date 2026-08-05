@@ -84,6 +84,9 @@ class ScraperManager:
                     # --- NEW PARSER ARCHITECTURE INTEGRATION ---
                     # Only parse if we lack info or need to update
                     nlp = extract_details_from_url(j['url'], org.name)
+                    if nlp is None:
+                        logger.warning(f"Skipping job insertion due to NLP/PDF failure: {j['url']}")
+                        continue
                     
                     if not existing:
                         # Log extracted fields

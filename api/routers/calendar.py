@@ -29,7 +29,7 @@ def get_calendar_events(
     if priority is not None: query = query.filter(Job.priority == priority)
         
     jobs = query.all()
-    job_ids = [j.Job.id for j in jobs]
+    job_ids = [j[0].id for j in jobs]
     exams = db.query(Exam).filter(Exam.job_id.in_(job_ids)).all() if job_ids else []
     
     exam_dict = {}
@@ -66,9 +66,9 @@ def get_calendar_filters(domain: Optional[str] = None, db: Session = Depends(get
         
     jobs = q.all()
     orgs = list(set([org_name for j, org_name in jobs if org_name]))
-    states = list(set([j.Job.state for j, _ in jobs if j.Job.state]))
-    statuses = list(set([j.Job.status for j, _ in jobs if j.Job.status]))
-    priorities = list(set([j.Job.priority for j, _ in jobs if j.Job.priority is not None]))
+    states = list(set([j[0].state for j in jobs if j[0].state]))
+    statuses = list(set([j[0].status for j in jobs if j[0].status]))
+    priorities = list(set([j[0].priority for j in jobs if j[0].priority is not None]))
     
     return {
         "orgs": sorted(orgs),

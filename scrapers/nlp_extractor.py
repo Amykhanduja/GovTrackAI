@@ -41,8 +41,10 @@ def extract_details_from_url(url: str, org_name: str = "Unknown"):
         if 'application/pdf' in content_type or url.lower().endswith('.pdf'):
             storage = PDFStorageManager()
             local_path = storage.download_if_needed(url, org_name)
-            if local_path:
-                pages_text, _ = deep_parse_pdf(local_path)
+            if not local_path:
+                logger.error(f"Failed to download PDF from {url}. Skipping.")
+                return None
+            pages_text, _ = deep_parse_pdf(local_path)
         else:
             parser = ParserFactory.get_parser("temp.html")
             pages_text = parser.extract_text(response.text, is_file=False)

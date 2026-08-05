@@ -21,4 +21,12 @@ app.include_router(excel_sync.router, prefix="/api/v1")
 app.include_router(intelligence.router, prefix="/api/v1")
 app.include_router(diagnostics.router, prefix="/api/v1")
 
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "message": "GovTrack AI backend is running"}
+
+@app.get("/version")
+def version_check():
+    return {"version": app.version}
+
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")

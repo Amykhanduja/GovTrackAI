@@ -12,8 +12,64 @@ class GenericPortalScraper(BaseScraper):
         super().__init__({})
         self.metadata = org_metadata
         self.name = self.metadata['name']
-        self.url = self.metadata['recruitment_url']
+        self.url = self.metadata.get('recruitment_url', '')
+        self.base_url = self.metadata.get('base_url', self.url)
         self.org_domains = self.metadata.get('career_domain', [])
+        
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Connection': 'keep-alive',
+            'Referer': self.base_url
+        }
+
+    def _fetch_url_with_retry(self, url, max_retries=3):
+        import time
+        import requests
+        backoff = 1
+        for attempt in range(max_retries):
+            try:
+                response = requests.get(url, headers=self.headers, timeout=15, verify=False, allow_redirects=True)
+                
+                if response.status_code in (404, 403, 410):
+                    logger.warning(f"Ignored invalid URL ({response.status_code}): {url}")
+                    return None
+                    
+                response.raise_for_status()
+                return response
+            except requests.exceptions.Timeout:
+                logger.warning(f"Timeout on {url}, attempt {attempt+1}/{max_retries}")
+            except requests.exceptions.TooManyRedirects:
+                logger.warning(f"Redirect loop on {url}")
+                return None
+            except requests.exceptions.RequestException as e:
+                logger.warning(f"Request failed on {url}: {e}")
+                
+            time.sleep(backoff)
+            backoff *= 2
+        return None
+
+    def _discover_recruitment_url(self):
+        from bs4 import BeautifulSoup
+        from urllib.parse import urljoin
+        
+        if not self.base_url: return self.url
+        
+        response = self._fetch_url_with_retry(self.base_url)
+        if not response:
+            return self.url
+            
+        soup = BeautifulSoup(response.text, 'html.parser')
+        nav_kws = ['career', 'recruit', 'vacanc', 'opportunit', 'job', 'opening']
+        for link in soup.find_all('a', href=True):
+            text = link.get_text(separator=' ', strip=True).lower()
+            href = link['href'].lower()
+            if any(kw in text for kw in nav_kws) or any(kw in href for kw in nav_kws):
+                full_url = urljoin(self.base_url, link['href'])
+                logger.info(f"Dynamically discovered recruitment page: {full_url}")
+                return full_url
+        return self.url
         
     def determine_domain(self, text: str) -> str:
         text = text.lower()
@@ -41,12 +97,15 @@ class GenericPortalScraper(BaseScraper):
         return self.org_domains[0] if self.org_domains else 'uncategorized'
 
     def scrape(self) -> list:
-        logger.info(f"REAL SCRAPE executing for {self.name} at {self.url}")
+        from urllib.parse import urljoin
+        
+        target_url = self._discover_recruitment_url()
+        logger.info(f"REAL SCRAPE executing for {self.name} at {target_url}")
         jobs = []
         try:
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            response = requests.get(self.url, headers=headers, timeout=20, verify=False)
-            response.raise_for_status()
+            response = self._fetch_url_with_retry(target_url)
+            if not response:
+                return []
             
             soup = BeautifulSoup(response.text, 'html.parser')
             
@@ -79,8 +138,7 @@ class GenericPortalScraper(BaseScraper):
                         seen_titles.add(text)
                         
                         # Fix relative URLs
-                        if not href.startswith('http'):
-                            href = self.url.rstrip('/') + '/' + href.lstrip('/')
+                        href = urljoin(target_url, href)
                             
                         # Domain classification
                         assigned_domain = self.determine_domain(text_lower)
@@ -122,20 +180,15 @@ class GenericPortalScraper(BaseScraper):
         }
         
         try:
-            headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
-            try:
-                response = requests.get(self.url, headers=headers, timeout=20, verify=False)
-                diag["status_code"] = response.status_code
-                response.raise_for_status()
-            except requests.exceptions.Timeout:
-                diag["errors"].append("Connection timeout")
-                diag["zero_reason"] = "Connection timeout"
+            target_url = self._discover_recruitment_url()
+            diag["url"] = target_url
+            response = self._fetch_url_with_retry(target_url)
+            if not response:
+                diag["errors"].append("Failed to fetch URL")
+                diag["zero_reason"] = "Failed to fetch URL"
                 return diag
-            except requests.exceptions.RequestException as e:
-                diag["errors"].append(str(e))
-                diag["zero_reason"] = f"Request failed: {type(e).__name__}"
-                return diag
-
+                
+            diag["status_code"] = response.status_code
             diag["success"] = True
             soup = BeautifulSoup(response.text, 'html.parser')
             
@@ -180,8 +233,8 @@ class GenericPortalScraper(BaseScraper):
                     
                 seen_titles.add(text)
                 
-                if not href.startswith('http'):
-                    href = self.url.rstrip('/') + '/' + href.lstrip('/')
+                from urllib.parse import urljoin
+                href = urljoin(target_url, href)
                     
                 diag["parsed"] += 1
                 jobs.append({
