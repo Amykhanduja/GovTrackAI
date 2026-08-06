@@ -3,7 +3,8 @@
     "beforeBuildCommand": "npm run build",
     "beforeDevCommand": "npm run dev",
     "devPath": "../frontend",
-    "distDir": "../frontend"
+    "distDir": "../frontend",
+    "withGlobalTauri": true
   },
   "package": {
     "productName": "GovTrack AI",
@@ -17,7 +18,7 @@
       "active": true,
       "category": "Office",
       "copyright": "GovTrack AI 2026",
-      "externalBin": ["govtrack-api"],
+      "externalBin": ["bin/govtrack-api"],
       "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
       "identifier": "com.govtrackai.app",
       "targets": "all",
@@ -42,13 +43,39 @@
     },
     "windows": [
       {
-        "fullscreen": false,
-        "height": 800,
-        "resizable": true,
+        "label": "main",
+        "url": "index.html",
         "title": "GovTrack AI",
-        "width": 1200,
-        "visible": false
+        "width": 1400,
+        "height": 900,
+        "minWidth": 1200,
+        "minHeight": 800,
+        "resizable": true,
+        "center": true,
+        "visible": false,
+        "decorations": true,
+        "transparent": false,
+        "alwaysOnTop": false,
+        "focus": true
+      },
+      {
+        "label": "splashscreen",
+        "url": "splash.html",
+        "title": "Starting GovTrack AI...",
+        "width": 500,
+        "height": 350,
+        "resizable": false,
+        "center": true,
+        "visible": true,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true
       }
     ]
+  },
+  "plugins": {
+    "window-state": {
+      "filename": ".window-state"
+    }
   }
 }

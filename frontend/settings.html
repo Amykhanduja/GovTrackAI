@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - GovTrack AI</title>
+    <style>
+        :root {
+            --bg-base: #f8f9fa;
+            --bg-sidebar: #ffffff;
+            --bg-surface: #ffffff;
+            --border-color: #e0e0e0;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --primary: #1a73e8;
+            --primary-hover: #1765cc;
+            --danger: #d32f2f;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-item {
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(26, 115, 232, 0.05);
+            color: var(--primary);
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(26, 115, 232, 0.1);
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 30px 40px;
+            overflow-y: auto;
+        }
+
+        .section {
+            display: none;
+            max-width: 600px;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .setting-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .setting-col {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .setting-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        select, input[type="text"], input[type="number"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            outline: none;
+            width: 200px;
+        }
+
+        .setting-col select, .setting-col input {
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        select:focus, input:focus {
+            border-color: var(--primary);
+        }
+
+        /* Toggle Switch */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input { 
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        button {
+            padding: 8px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            background-color: var(--bg-surface);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        
+        button:hover {
+            background-color: #f1f3f4;
+        }
+        
+        button.danger {
+            color: var(--danger);
+            border-color: rgba(211, 47, 47, 0.5);
+        }
+        
+        button.danger:hover {
+            background-color: rgba(211, 47, 47, 0.05);
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #323232;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <div class="sidebar-item active" data-target="general">General</div>
+        <div class="sidebar-item" data-target="scrapers">Scrapers</div>
+        <div class="sidebar-item" data-target="downloads">Downloads</div>
+        <div class="sidebar-item" data-target="notifications">Notifications</div>
+        <div class="sidebar-item" data-target="ai">AI Engine</div>
+        <div class="sidebar-item" data-target="updates">Updates</div>
+        <div class="sidebar-item" data-target="advanced">Advanced</div>
+    </div>
+
+    <div class="content">
+        <!-- GENERAL -->
+        <div id="general" class="section active">
+            <h2>General</h2>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Theme</div>
+                    <div class="setting-desc">Choose application appearance</div>
+                </div>
+                <select class="auto-save" name="theme">
+                    <option value="system">System Default</option>
+                    <option value="light">Light</option>
+                    <option value="dark">Dark</option>
+                </select>
+            </div>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Language</div>
+                </div>
+                <select class="auto-save" name="language">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                </select>
+            </div>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Auto Save</div>
+                    <div class="setting-desc">Automatically save forms and changes</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="auto_save" checked><span class="slider"></span></label>
+            </div>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Auto Backup</div>
+                    <div class="setting-desc">Daily background database backup</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="auto_backup" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Start with Windows</div>
+                    <div class="setting-desc">Launch background service on boot</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="start_with_windows" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Minimize to Tray</div>
+                    <div class="setting-desc">Minimize window to the system tray instead of taskbar</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="minimize_to_tray" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Close to Tray</div>
+                    <div class="setting-desc">Closing window hides it instead of exiting</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="close_to_tray" checked><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <!-- SCRAPERS -->
+        <div id="scrapers" class="section">
+            <h2>Scrapers</h2>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Refresh Interval</div>
+                    <div class="setting-desc">How often to run background scrapers</div>
+                </div>
+                <select class="auto-save" name="refresh_interval">
+                    <option value="15">Every 15 minutes</option>
+                    <option value="30">Every 30 minutes</option>
+                    <option value="60" selected>Every hour</option>
+                    <option value="360">Every 6 hours</option>
+                </select>
+            </div>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Maximum Threads</div>
+                    <div class="setting-desc">Concurrent scraping operations</div>
+                </div>
+                <input type="number" class="auto-save" name="max_threads" value="4" min="1" max="16">
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Retry Count</div>
+                    <div class="setting-desc">Number of retries for failed network requests</div>
+                </div>
+                <input type="number" class="auto-save" name="retry_count" value="3" min="0" max="10">
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Request Timeout (seconds)</div>
+                </div>
+                <input type="number" class="auto-save" name="request_timeout" value="30" min="5">
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Parallel Downloads</div>
+                    <div class="setting-desc">Download multiple PDFs simultaneously</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="parallel_downloads" checked><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <!-- DOWNLOADS -->
+        <div id="downloads" class="section">
+            <h2>Downloads</h2>
+            
+            <div class="setting-col">
+                <div class="setting-label">Download Folder</div>
+                <input type="text" class="auto-save" name="dl_folder" value="C:\Users\Admin\Downloads\GovTrack">
+            </div>
+
+            <div class="setting-col">
+                <div class="setting-label">PDF Folder</div>
+                <input type="text" class="auto-save" name="pdf_folder" value="C:\Users\Admin\Downloads\GovTrack\PDFs">
+            </div>
+
+            <div class="setting-col">
+                <div class="setting-label">Excel Export Folder</div>
+                <input type="text" class="auto-save" name="excel_folder" value="C:\Users\Admin\Downloads\GovTrack\Exports">
+            </div>
+
+            <div class="setting-col">
+                <div class="setting-label">Temporary Folder</div>
+                <input type="text" class="auto-save" name="temp_folder" value="C:\Users\Admin\AppData\Local\Temp\GovTrack">
+            </div>
+        </div>
+
+        <!-- NOTIFICATIONS -->
+        <div id="notifications" class="section">
+            <h2>Notifications</h2>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Desktop Notifications</div>
+                    <div class="setting-desc">Show native Windows notifications</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="desktop_notifications" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Sound</div>
+                    <div class="setting-desc">Play sound for new notifications</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="sound" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Reminder Time (Days)</div>
+                    <div class="setting-desc">Days before deadline to remind</div>
+                </div>
+                <input type="number" class="auto-save" name="reminder_time" value="3" min="1">
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Upcoming Exams</div>
+                    <div class="setting-desc">Notify for upcoming admit cards and exams</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="upcoming_exams" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">New Jobs</div>
+                    <div class="setting-desc">Notify instantly when a new job is discovered</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="new_jobs" checked><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <!-- AI -->
+        <div id="ai" class="section">
+            <h2>AI Engine</h2>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Enable AI Processing</div>
+                    <div class="setting-desc">Master switch for all AI features</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="enable_ai" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Eligibility Engine</div>
+                    <div class="setting-desc">Automatically check if profile matches job</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="eligibility_engine" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Smart Ranking</div>
+                    <div class="setting-desc">Sort jobs by match probability</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="smart_ranking" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Job Recommendations</div>
+                    <div class="setting-desc">Suggest alternative jobs based on profile</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="job_recommendations" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Resume Assistant</div>
+                    <div class="setting-desc">Extract skills and experience from Resume</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="resume_assistant" checked><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <!-- UPDATES -->
+        <div id="updates" class="section">
+            <h2>Updates</h2>
+            
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Auto Check for Updates</div>
+                    <div class="setting-desc">Check for application updates silently</div>
+                </div>
+                <label class="switch"><input type="checkbox" class="auto-save" name="auto_check_updates" checked><span class="slider"></span></label>
+            </div>
+
+            <div class="setting-row">
+                <div>
+                    <div class="setting-label">Update Channel</div>
+                </div>
+                <select class="auto-save" name="update_channel">
+                    <option value="stable" selected>Stable (Recommended)</option>
+                    <option value="beta">Beta (Early Access)</option>
+                    <option value="dev">Development (Unstable)</option>
+                </select>
+            </div>
+            
+            <button style="margin-top: 10px;">Check for Updates Now</button>
+        </div>
+
+        <!-- ADVANCED -->
+        <div id="advanced" class="section">
+            <h2>Advanced</h2>
+            
+            <div class="setting-col">
+                <div class="setting-label">Database Path</div>
+                <input type="text" class="auto-save" name="db_path" value="C:\Users\Admin\AppData\Local\GovTrack\govtrack.db">
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap;">
+                <button>Clear Cache</button>
+                <button>Rebuild Search Index</button>
+                <button class="danger">Reset Settings</button>
+                <button class="danger">Recreate Database</button>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="toast" id="toast">Settings saved successfully.</div>
+
+    <script>
+        // Sidebar Navigation
+        const sidebarItems = document.querySelectorAll('.sidebar-item');
+        const sections = document.querySelectorAll('.section');
+
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', () => {
+                sidebarItems.forEach(i => i.classList.remove('active'));
+                sections.forEach(s => s.classList.remove('active'));
+                
+                item.classList.add('active');
+                document.getElementById(item.dataset.target).classList.add('active');
+            });
+        });
+
+        // Auto Save Logic
+        const autoSaveInputs = document.querySelectorAll('.auto-save');
+        let saveTimeout;
+        const toast = document.getElementById('toast');
+
+        function showToast() {
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        autoSaveInputs.forEach(input => {
+            input.addEventListener('change', (e) => {
+                // Clear previous timeout to debounce
+                clearTimeout(saveTimeout);
+                
+                // Construct config payload if backend existed
+                const name = e.target.name;
+                const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+                
+                // Show toast after 400ms debounce
+                saveTimeout = setTimeout(() => {
+                    // Send to backend/Tauri context
+                    // window.__TAURI__.invoke('save_setting', { key: name, value: val });
+                    console.log(`Saved: ${name} = ${val}`);
+                    showToast();
+                }, 400);
+            });
+        });
+    </script>
+</body>
+</html>

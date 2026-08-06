@@ -6,7 +6,7 @@ Base = declarative_base()
 class Organization(Base):
     __tablename__ = 'organizations'
     id = Column(Integer, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, nullable=False, index=True)
     category = Column(String)
     website = Column(String)
     ministry = Column(String)
@@ -19,17 +19,17 @@ class Job(Base):
     description = Column(Text)
     salary = Column(Integer, default=0)
     vacancies = Column(Integer, default=0)
-    deadline = Column(DateTime)
+    deadline = Column(DateTime, index=True)
     created_at = Column(DateTime)
     skills = Column(Text)
     url = Column(String)
-    domain = Column(String)
+    domain = Column(String, index=True)
     
     qualification = Column(String)
     age_limit = Column(Integer)
     experience_years = Column(Integer)
     
-    status = Column(String, default="New")
+    status = Column(String, default="New", index=True)
     priority = Column(Integer, default=0)
     is_hidden = Column(Boolean, default=False)
     is_trashed = Column(Boolean, default=False)
@@ -78,7 +78,7 @@ class JobDocument(Base):
 class RecruitmentHistory(Base):
     __tablename__ = 'recruitment_history'
     id = Column(Integer, primary_key=True)
-    org_id = Column(Integer, ForeignKey('organizations.id'))
+    org_id = Column(Integer, ForeignKey('organizations.id'), index=True)
     department = Column(String)
     recruitment_name = Column(String)
     advt_no = Column(String)
@@ -96,7 +96,7 @@ class RecruitmentHistory(Base):
     age_limit = Column(Integer)
     official_pdf = Column(String)
     official_link = Column(String)
-    status = Column(String)  # Active, Expired, Cancelled, Superseded, Archived
+    status = Column(String, index=True)  # Active, Expired, Cancelled, Superseded, Archived
     job_id = Column(Integer, ForeignKey('jobs.id'), nullable=True)
 
 class RecruitmentCycle(Base):

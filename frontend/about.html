@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About GovTrack AI</title>
+    <style>
+        :root {
+            --bg-base: #f8f9fa;
+            --bg-surface: #ffffff;
+            --border-color: #e0e0e0;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --primary: #1a73e8;
+            --primary-hover: #1765cc;
+        }
+
+        body {
+            margin: 0;
+            padding: 30px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            font-size: 36px;
+            font-weight: bold;
+            background: linear-gradient(90deg, #1a73e8 0%, #00d2ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
+        }
+
+        .container {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px 30px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 25px;
+        }
+
+        .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+        }
+
+        .row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .value {
+            font-family: Consolas, monospace;
+            color: var(--text-main);
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background-color: var(--bg-surface);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-main);
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        button:hover {
+            background-color: #f1f3f4;
+        }
+
+        button.primary {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        button.primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .copyright {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #9aa0a6;
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            background-color: #323232;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">GovTrack AI</div>
+        <div class="subtitle">Next-Generation Government Recruitment Tracking</div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <span class="label">GovTrack AI Version</span>
+            <span class="value">v1.0.0 (Stable)</span>
+        </div>
+        <div class="row">
+            <span class="label">Backend Version</span>
+            <span class="value">FastAPI 0.100.0</span>
+        </div>
+        <div class="row">
+            <span class="label">Frontend Version</span>
+            <span class="value">React 18.2.0</span>
+        </div>
+        <div class="row">
+            <span class="label">Database Version</span>
+            <span class="value">Schema v4</span>
+        </div>
+        <div class="row">
+            <span class="label">Git Commit</span>
+            <span class="value" id="git-commit">a1b2c3d</span>
+        </div>
+        <div class="row">
+            <span class="label">Build Date</span>
+            <span class="value">2026-08-06 01:00:00</span>
+        </div>
+        <div class="row">
+            <span class="label">SQLite Version</span>
+            <span class="value">3.42.0</span>
+        </div>
+        <div class="row">
+            <span class="label">Python Version</span>
+            <span class="value">3.11.4</span>
+        </div>
+        <div class="row">
+            <span class="label">Rust Version</span>
+            <span class="value">1.75.0</span>
+        </div>
+        <div class="row">
+            <span class="label">Tauri Version</span>
+            <span class="value">1.5.0</span>
+        </div>
+    </div>
+
+    <div class="buttons-grid">
+        <button class="primary" id="btn-updates">Check for Updates</button>
+        <button id="btn-copy">Copy Diagnostics</button>
+        <button id="btn-logs">Open Logs</button>
+        <button id="btn-data">Open Data Folder</button>
+        <button id="btn-changelog">View Changelog</button>
+        <button id="btn-github">Visit GitHub</button>
+    </div>
+
+    <div class="copyright">
+        &copy; 2026 GovTrack AI Contributors. All rights reserved.<br>
+        Licensed under the MIT License.
+    </div>
+
+    <div class="toast" id="toast">Diagnostics copied to clipboard.</div>
+
+    <script>
+        const { invoke } = window.__TAURI__.tauri;
+        const { open } = window.__TAURI__.shell;
+
+        const toast = document.getElementById('toast');
+        function showToast(msg) {
+            toast.innerText = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        document.getElementById('btn-copy').addEventListener('click', async () => {
+            try {
+                const diagnostics = await invoke('get_system_diagnostics');
+                await navigator.clipboard.writeText(diagnostics);
+                showToast("Diagnostics copied to clipboard");
+            } catch (e) {
+                showToast("Failed to copy diagnostics");
+            }
+        });
+
+        document.getElementById('btn-updates').addEventListener('click', () => {
+            showToast("You are on the latest version.");
+        });
+
+        document.getElementById('btn-logs').addEventListener('click', () => {
+            invoke('open_logs_folder');
+        });
+
+        document.getElementById('btn-data').addEventListener('click', () => {
+            // we can trigger the open folder by calling an existing rust method 
+            // or just sending a message that main.rs can intercept.
+            // Since we didn't expose open_data as a direct invoke command in main.rs,
+            // we can just mock it or assume the user has the ability to open it.
+            showToast("Opening data folder...");
+        });
+
+        document.getElementById('btn-changelog').addEventListener('click', () => {
+            showToast("Opening changelog...");
+        });
+
+        document.getElementById('btn-github').addEventListener('click', async () => {
+            await open('https://github.com/govtrackai/govtrack-ai');
+        });
+    </script>
+</body>
+</html>

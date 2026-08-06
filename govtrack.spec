@@ -36,7 +36,7 @@ hiddenimports = [
     'passlib',
     'passlib.handlers.bcrypt',
     'jose',
-    'python-multipart'
+    'multipart'
 ]
 
 # 2. Data Files
@@ -59,10 +59,8 @@ datas = [
     ('core', 'core'),
     ('downloads', 'downloads'),
     ('exceptions', 'exceptions'),
-    ('icons', 'icons'),
-    ('assets', 'assets'),
-    ('templates', 'templates'),
-    ('static', 'static')
+    ('ai', 'ai')
+   
 ]
 
 # Note: We omit 'data', '__pycache__', 'logs', 'venv', 'src-tauri' because they are dynamic or irrelevant.

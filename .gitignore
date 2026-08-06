@@ -27,3 +27,6 @@ src-tauri/bin/
 # OS Generated
 .DS_Store
 Thumbs.db
+build/
+venv_wsl/
+pyinstaller_error.txt

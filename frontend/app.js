@@ -1,4 +1,4 @@
-const API_BASE = '/api/v1';
+const API_BASE = 'http://127.0.0.1:8000/api/v1';
 let currentDomain = localStorage.getItem('govtrack_domain') || null;
 let currentFilter = 'active'; 
 let allJobs = [];
@@ -53,18 +53,23 @@ window.switchTab = function(viewId, filter) {
     }
 };
 
-async function fetchJobs() {
+async function fetchJobs(retries = 10) {
     if (!currentDomain) return;
     try {
         const response = await fetch(`${API_BASE}/jobs/?domain=${currentDomain}`);
         if (!response.ok) throw new Error('API Error');
         allJobs = await response.json();
     } catch (e) {
+        if (retries > 0) {
+            console.log(`Waiting for backend... (${retries} attempts left)`);
+            setTimeout(() => fetchJobs(retries - 1), 2000);
+            return;
+        }
         console.error("API Connection Error", e);
         allJobs = [];
         if(emptyState) {
             emptyState.style.display = 'block';
-            emptyState.textContent = 'Unable to connect to backend.';
+            emptyState.textContent = 'Unable to connect to backend. Please restart the app.';
         }
         const loader = document.getElementById('initialLoader');
         if(loader) loader.style.display = 'none';
@@ -408,7 +413,7 @@ window.openIntelligentViewer = async function(id, fallbackUrl) {
     document.getElementById("pdfViewerModal").style.display = "flex";
     
     try {
-        const res = await fetch(`/api/v1/jobs/${id}/document`);
+        const res = await fetch(`${API_BASE}/jobs/${id}/document`);
         const data = await res.json();
         
         if (data.status === "found") {
@@ -433,8 +438,8 @@ window.openIntelligentViewer = async function(id, fallbackUrl) {
             document.getElementById("pvTables").innerHTML = `Found ${data.extracted_tables.length} structured tables dynamically extracted from the PDF.`;
             
             document.getElementById("pvBtnPdf").style.display = "block";
-            document.getElementById("pvBtnPdf").dataset.pdf = `/api/v1/jobs/${id}/pdf`;
-            document.getElementById("pvIframe").src = `/api/v1/jobs/${id}/pdf`;
+            document.getElementById("pvBtnPdf").dataset.pdf = `${API_BASE}/jobs/${id}/pdf`;
+            document.getElementById("pvIframe").src = `${API_BASE}/jobs/${id}/pdf`;
         } else {
             document.getElementById("pvTitle").textContent = "No Local PDF Available";
             document.getElementById("pvSummary").textContent = "This notification did not contain an official PDF on the first scan. Loading original website...";
